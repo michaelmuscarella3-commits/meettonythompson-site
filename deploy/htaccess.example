@@ -1,0 +1,12 @@
+# Apache (cPanel) rules for a single-page app.
+# Merge into public_html/.htaccess; keep any existing rules (e.g. HTTPS redirects).
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  # Serve real files and folders (assets, api/*.php, PDFs) as-is.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+  # Everything else goes to the React app.
+  RewriteRule ^ index.html [L]
+</IfModule>

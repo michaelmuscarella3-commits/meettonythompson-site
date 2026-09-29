@@ -1,0 +1,227 @@
+/* Hand-written styles carried over from the original site. */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 1;
+}
+.tetris-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0.25;
+  pointer-events: none;
+}
+.tetris-t {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tetris-t .t-row.top,
+.tetris-t .t-row.bottom {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.tetris-t .t-row div {
+  width: 40px;
+  height: 40px;
+  background: #555;
+  border-radius: 3px;
+  box-shadow: 0 0 8px #00000080;
+  animation: tetrisFall 24s ease-in-out infinite;
+}
+@keyframes tetrisFall {
+  0%,
+  25% {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+  50%,
+  75% {
+    transform: translateY(100px) rotate(360deg);
+    opacity: 0.4;
+  }
+  to {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+@keyframes float {
+  0%,
+  to {
+    transform: translateY(0) rotate(0);
+  }
+  50% {
+    transform: translateY(-6px) rotate(-2deg);
+  }
+}
+.video-widget {
+  width: 6.5cm;
+  height: 2.3cm;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #952ca8, #7d1f97);
+  box-shadow: 0 0 14px #9b26b6cc;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
+}
+.video-widget:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #b14fc0e6;
+}
+.scroll-indicator span {
+  letter-spacing: 2px;
+}
+.arrow {
+  margin: 8px auto 0;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid #7d1f97;
+  border-bottom: 2px solid #7d1f97;
+  transform: rotate(45deg);
+  animation: arrowBounce 2.5s ease-in-out infinite;
+}
+@keyframes arrowBounce {
+  0%,
+  to {
+    transform: translateY(0) rotate(45deg);
+  }
+  50% {
+    transform: translateY(8px) rotate(45deg);
+  }
+}
+:root {
+  --z-bg: 1;
+  --z-ambient: 5;
+  --z-content: 50;
+  --z-widget: 100;
+  --z-menu: 800;
+  --z-logo: 9999;
+  --z-modal: 10000;
+  --z-system: 20000;
+  --z-menu-bg: 790;
+  --z-menu-item: 810;
+  --z-modal-overlay: 9995;
+  --z-modal-content: 10000;
+}
+.z-bg {
+  z-index: var(--z-bg);
+}
+.z-ambient {
+  z-index: var(--z-ambient);
+}
+.z-content {
+  z-index: var(--z-content);
+}
+.z-widget {
+  z-index: var(--z-widget);
+}
+.z-menu {
+  z-index: var(--z-menu);
+}
+.z-logo {
+  z-index: var(--z-logo);
+}
+.z-modal {
+  z-index: var(--z-modal);
+}
+.z-system {
+  z-index: var(--z-system);
+}
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: auto;
+  overflow-x: hidden;
+}
+html {
+  scroll-behavior: auto !important;
+}
+.section-haze:before,
+.section-haze:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 160px;
+  background: radial-gradient(ellipse at center, #9b26b640, #000000e6);
+  filter: blur(60px);
+  opacity: 0.45;
+  transition: opacity 0.8s ease-in-out;
+  pointer-events: none;
+}
+.section-haze:before {
+  top: -80px;
+}
+.section-haze:after {
+  bottom: -80px;
+}
+@keyframes hazeDrift {
+  0%,
+  to {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-20px);
+    opacity: 0.9;
+  }
+}
+.animate-hazeDrift {
+  animation: hazeDrift 25s ease-in-out infinite;
+}
+@keyframes pressPlayGlow {
+  0%,
+  to {
+    background-position: 0% 50%;
+    filter: drop-shadow(0 0 6px rgba(155, 38, 182, 0.4))
+      drop-shadow(0 0 14px rgba(177, 79, 192, 0.3));
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.8))
+      drop-shadow(0 0 26px rgba(155, 38, 182, 0.7))
+      drop-shadow(0 0 48px rgba(177, 79, 192, 0.6));
+  }
+}
+.animate-pressPlayGlow {
+  background-size: 200% auto;
+  animation: pressPlayGlow 5s ease-in-out infinite;
+}
+body.quiz-active .fixed-layer,
+body.quiz-active .global-overlay,
+body.quiz-active #hamburger,
+body.quiz-active .logo-container,
+body.quiz-active [class*="logo"],
+body.quiz-active [class*="menu"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: opacity 0.3s ease-in-out;
+}
+chat-widget {
+  --primary-color: #9b26b6 !important;
+  --secondary-color: #7d1f97 !important;
+}
+#lc_text-widget--btn,
+.lc_text-widget--bubble,
+.lc_text-widget--header,
+[class*="lc_text-widget--header"] {
+  background-color: #9b26b6 !important;
+}
+#lc_text-widget--btn:hover,
+.lc_text-widget--bubble:hover {
+  background-color: #7d1f97 !important;
+}
+chat-widget::part(launcher),
+chat-widget::part(header) {
+  background-color: #9b26b6 !important;
+}

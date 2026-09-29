@@ -1,0 +1,21 @@
+export function AmbientGlow() {
+  return (
+    <div
+      className="fixed inset-0 pointer-events-none z-[10]"
+      style={{
+        background:
+          "radial-gradient(ellipse at bottom, rgba(155,38,182,0.14) 0%, transparent 70%)",
+        transform: "translateZ(0)",
+        backfaceVisibility: "hidden",
+      }}
+    />
+  );
+}
+/**
+ * @license lucide-react v0.546.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+
+export default AmbientGlow;

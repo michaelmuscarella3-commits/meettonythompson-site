@@ -1,0 +1,6 @@
+@import "./custom.css";
+@import "./legacy-utilities.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
