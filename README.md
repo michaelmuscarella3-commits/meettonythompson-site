@@ -25,6 +25,7 @@ npm run preview  # serve the production build
 | Cookie banner | `src/components/layout/CookieBanner.jsx` |
 | About Tony page sections | `src/pages/AboutTony.jsx` → `src/components/about/*` |
 | Other pages | `src/pages/*.jsx` (one file per page) |
+| Podcast episodes (from YouTube) | `src/data/podcastEpisodes.js` |
 | Quiz questions and results | `src/components/quiz/quizData.jsx` |
 | Site-wide styles | `src/styles/custom.css`, `tailwind.config.js` |
 | Images, videos, PDF | `public/assets`, `public/videos` (see `public/assets/README.md`) |

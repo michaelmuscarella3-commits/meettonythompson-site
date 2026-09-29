@@ -9,81 +9,34 @@ import {
   ActivityIcon,
   ArrowRightIcon,
   CircleCheckIcon,
-  PauseIcon,
   PlayIcon,
   RadioIcon,
   SearchIcon,
-  SkipBackIcon,
-  SkipForwardIcon,
   TerminalIcon,
   TrendingUpIcon,
-  Volume2Icon,
   XIcon,
 } from "lucide-react";
 import React from "react";
+import {
+  EPISODES,
+  PODCAST_CHANNEL_URL,
+  youtubeThumbnail,
+  youtubeWatchUrl,
+} from "../data/podcastEpisodes";
 
-const SpotifyIcon = ({ className: e }) => (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={e}>
-      <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.4-1.02 15.6 1.44.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
-    </svg>
-  ),
-  AppleIcon = ({ className: e }) => (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={e}>
-      <path d="M21.526 10.548C21.365 7.158 19.3 4.2 16.326 2.531c-.39-.219-.884-.08-1.103.311-.22.39-.08.884.311 1.103 2.576 1.446 4.363 4.009 4.502 6.945.016.331.229.622.548.747.319.126.68.049.914-.196.01-.01.019-.02.028-.031v-.862zm-19.052 0c-.01 2.895 1.748 5.426 4.287 6.896.388.225.882.091 1.107-.297.225-.388.091-.882-.297-1.107-2.126-1.23-3.598-3.348-3.59-5.772v-.862c.009.011.018.021.028.031.234.245.595.322.914.196.319-.125.532-.416.548-.747.139-2.936 1.926-5.499 4.502-6.945.391-.219.531-.713.311-1.103-.219-.391-.713-.53-1.103-.311C6.204 4.2 4.139 7.158 3.978 10.548H2.474v.862h-.001zM11.992 4.31c-3.364 0-6.092 2.728-6.092 6.092s2.728 6.092 6.092 6.092 6.092-2.728 6.092-6.092-2.728-6.092-6.092-6.092zm0 10.669c-2.524 0-4.577-2.053-4.577-4.577s2.053-4.577 4.577-4.577 4.577 2.053 4.577-4.577-2.053 4.577-4.577 4.577z" />
-      <path d="M12 17.5c-1.381 0-2.5 1.119-2.5 2.5s1.119 2.5 2.5 2.5 2.5-1.119 2.5-2.5-1.119-2.5-2.5-1.119-2.5-2.5-1.119-2.5-2.5-1.119-2.5-2.5-1.119-2.5-2.5-1.119-2.5-2.5-2.5z" />
-    </svg>
-  ),
-  YouTubeIcon = ({ className: e }) => (
+// "EP.12" when the YouTube title carries a number, otherwise the air date.
+const episodeLabel = (e) =>
+  e.episode
+    ? `EP.${e.episode}`
+    : new Date(`${e.publishedAt}T12:00:00`)
+        .toLocaleDateString("en-US", { month: "short", day: "numeric" })
+        .toUpperCase();
+
+const YouTubeIcon = ({ className: e }) => (
     <svg viewBox="0 0 24 24" fill="currentColor" className={e}>
       <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
     </svg>
   ),
-  EPISODES = [
-    {
-      id: 104,
-      title: "The Rookie Launchpad: Your First 6 Months in Mortgage",
-      guest: "Tony Thompson",
-      category: "Mortgage",
-      duration: "45:15",
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-      desc: "Starting from zero? This is your survival guide. Tony breaks down exactly how to get your first 10 loans, build agent relationships, and avoid the 'rookie burnout' trap.",
-      image:
-        "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      id: 103,
-      title: "From 1 to 100: Scaling Your Volume Without Losing Your Mind",
-      guest: "Top Originator Panel",
-      category: "Mortgage",
-      duration: "54:10",
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-      desc: "You've mastered the basics—now let's scale. We discuss hiring your first assistant, automating your workflow, and making the leap to 9-figure volume.",
-      image:
-        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      id: 102,
-      title: "Finding Your Voice: Public Speaking for Introverts & Beginners",
-      guest: "Tony Thompson",
-      category: "Keynote",
-      duration: "38:33",
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-      desc: "Think you can't command a stage? Think again. Tony reveals the framework he used to go from terrified to headlining major conferences.",
-      image:
-        "https://images.unsplash.com/photo-1475721027767-f4242310f17e?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      id: 101,
-      title: "The Modern Loan Officer: Personal Branding 101",
-      guest: "Industry Experts",
-      category: "Branding",
-      duration: "42:20",
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-      desc: "In a digital world, your reputation is your resume. Learn how to build a personal brand that attracts real estate agents and borrowers on autopilot.",
-      image:
-        "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80",
-    },
-  ],
   Reveal = ({ children: e, className: t, delay: n = 0 }) => (
     <div className={`overflow-hidden block relative py-4 -my-4 ${t}`}>
       <motion.div
@@ -174,27 +127,6 @@ const SpotifyIcon = ({ className: e }) => (
       </div>
     );
   },
-  Equalizer = ({ isPlaying: e }) => (
-    <motion.div
-      animate={
-        e
-          ? {
-              height: [4, 16, 8, 24, 4],
-              backgroundColor: ["#FFFFFF", "#FFD700", "#FFFFFF"],
-            }
-          : {
-              height: 4,
-              backgroundColor: "#FFFFFF",
-            }
-      }
-      transition={{
-        duration: 0.5,
-        repeat: 1 / 0,
-        repeatType: "mirror",
-      }}
-      className="w-1 rounded-full bg-white"
-    />
-  ),
   FeaturedEpisode = ({ onPlay: e }) => {
     const t = EPISODES[0];
     return (
@@ -220,14 +152,14 @@ const SpotifyIcon = ({ className: e }) => (
             {" Now Streaming"}
           </span>
           <span className="text-[10px] font-mono font-bold text-white/60">
-            EP.{t.id}
+            {episodeLabel(t)}
           </span>
         </div>
         <div className="flex gap-4 lg:gap-5 items-start">
           <div className="w-16 h-16 lg:w-24 lg:h-24 rounded-lg bg-black/50 overflow-hidden flex-shrink-0 border border-white/10">
             <img
-              src={t.image}
-              alt="Thumb"
+              src={youtubeThumbnail(t.id)}
+              alt={t.guest}
               className="w-full h-full object-cover opacity-80"
             />
           </div>
@@ -248,106 +180,109 @@ const SpotifyIcon = ({ className: e }) => (
             <PlayIcon className="w-3 h-3 fill-current" />
             {" Play Episode"}
           </button>
-          <div className="hidden lg:flex w-12 h-12 items-center justify-center rounded-lg border border-white/10 text-white/40">
-            <Volume2Icon className="w-4 h-4" />
-          </div>
+          <a
+            href={PODCAST_CHANNEL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Chasing Excellence on YouTube"
+            className="hidden lg:flex w-12 h-12 items-center justify-center rounded-lg border border-white/10 text-white/40 hover:text-[#FFD700] hover:border-[#FFD700]/40 transition-colors"
+          >
+            <YouTubeIcon className="w-4 h-4 fill-current" />
+          </a>
         </div>
       </motion.div>
     );
   },
-  PlayerBar = ({
-    activeEpisode: e,
-    isPlaying: t,
-    togglePlay: n,
-    currentTime: r,
-    duration: i,
-    onClose: a,
-  }) => {
-    const s = i ? (r / i) * 100 : 0;
+  VideoPlayer = ({ activeEpisode: e, onClose: t }) => {
+    React.useEffect(() => {
+      if (!e) return;
+      const n = (n) => "Escape" === n.key && t();
+      return (
+        window.addEventListener("keydown", n),
+        () => window.removeEventListener("keydown", n)
+      );
+    }, [e, t]);
     return (
       <AnimatePresence>
         {e && (
           <motion.div
             initial={{
-              y: "100%",
+              opacity: 0,
             }}
             animate={{
-              y: 0,
+              opacity: 1,
             }}
             exit={{
-              y: "100%",
+              opacity: 0,
             }}
             transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 30,
+              duration: 0.3,
             }}
-            className="fixed bottom-0 left-0 right-0 z-[100] bg-[#0a0a0a]/95 backdrop-blur-xl border-t border-[#FFD700]/20 shadow-[0_-10px_40px_rgba(0,0,0,0.8)]"
+            onClick={t}
+            className="fixed inset-0 z-[2147483647] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 md:p-10"
           >
-            <div className="max-w-[1800px] mx-auto px-4 md:px-6 h-20 md:h-24 flex items-center justify-between gap-4 md:gap-8 relative">
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/10">
-                <motion.div
-                  className="h-full bg-[#FFD700]"
-                  style={{
-                    width: `${s}%`,
-                  }}
-                  layoutId="progressBar"
+            <motion.div
+              initial={{
+                y: 40,
+                opacity: 0,
+              }}
+              animate={{
+                y: 0,
+                opacity: 1,
+              }}
+              exit={{
+                y: 40,
+                opacity: 0,
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-5xl bg-[#0a0a0a] border border-[#FFD700]/20 rounded-2xl overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.8)]"
+            >
+              <div className="relative w-full aspect-video bg-black">
+                <iframe
+                  className="absolute inset-0 w-full h-full"
+                  src={`https://www.youtube-nocookie.com/embed/${e.id}?autoplay=1&rel=0`}
+                  title={e.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen={!0}
                 />
               </div>
-              <div className="flex items-center gap-4 flex-1 min-w-0">
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-[#FFD700] flex items-center justify-center font-black text-black text-xs shrink-0 rounded">
-                  {e.id}
+              <div className="px-4 md:px-6 py-4 md:py-5 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="px-2 h-10 md:h-12 min-w-[2.5rem] md:min-w-[3rem] bg-[#FFD700] flex items-center justify-center font-black text-black text-[10px] md:text-xs shrink-0 rounded">
+                    {episodeLabel(e)}
+                  </div>
+                  <div className="overflow-hidden">
+                    <h4 className="text-xs md:text-sm font-black text-white truncate">
+                      {e.title}
+                    </h4>
+                    <p className="text-[10px] uppercase font-bold tracking-widest text-white/50 truncate">
+                      {e.guest}
+                    </p>
+                  </div>
                 </div>
-                <div className="overflow-hidden">
-                  <h4 className="text-xs md:text-sm font-black text-white truncate">
-                    {e.title}
-                  </h4>
-                  <p className="text-[10px] uppercase font-bold tracking-widest text-white/50 truncate">
-                    {e.guest}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 md:gap-6">
-                <button className="hidden md:block text-white/40 hover:text-white transition-colors">
-                  <SkipBackIcon size={20} />
-                </button>
-                <button
-                  onClick={n}
-                  className="w-10 h-10 md:w-14 md:h-14 rounded-full border border-white/20 flex items-center justify-center hover:bg-white hover:text-black hover:border-white transition-all bg-white/5"
+                <a
+                  href={youtubeWatchUrl(e.id)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hidden md:flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/50 hover:text-[#FFD700] transition-colors"
                 >
-                  {t ? (
-                    <PauseIcon className="w-4 h-4 md:w-5 md:h-5 fill-current" />
-                  ) : (
-                    <PlayIcon className="w-4 h-4 md:w-5 md:h-5 fill-current translate-x-0.5" />
-                  )}
-                </button>
-                <button className="hidden md:block text-white/40 hover:text-white transition-colors">
-                  <SkipForwardIcon size={20} />
-                </button>
+                  <YouTubeIcon className="w-4 h-4 fill-current" />
+                  YouTube
+                </a>
                 <button
-                  onClick={a}
-                  className="md:hidden text-white/40 hover:text-white"
+                  onClick={t}
+                  aria-label="Close video"
+                  className="text-white/40 hover:text-white transition-colors"
                 >
                   <XIcon size={20} />
                 </button>
               </div>
-              <div className="hidden md:flex items-center gap-1 h-8 flex-1 justify-end opacity-50">
-                <div className="mr-8 font-mono text-xs text-[#FFD700]">
-                  {new Date(1e3 * r).toISOString().substr(14, 5)}
-                  {" / "}
-                  {new Date(1e3 * i).toISOString().substr(14, 5)}
-                </div>
-                {[...Array(12)].map((e, n) => (
-                  <Equalizer isPlaying={t} key={n} />
-                ))}
-                <button
-                  onClick={a}
-                  className="ml-6 text-white/40 hover:text-white transition-colors"
-                >
-                  <XIcon size={20} />
-                </button>
-              </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -383,7 +318,7 @@ const SpotifyIcon = ({ className: e }) => (
       >
         <div className="relative w-full lg:w-[320px] aspect-video flex-shrink-0 rounded-2xl overflow-hidden bg-black/50">
           <img
-            src={e.image}
+            src={youtubeThumbnail(e.id)}
             alt={e.guest}
             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-in-out opacity-80 group-hover:opacity-100"
           />
@@ -404,9 +339,14 @@ const SpotifyIcon = ({ className: e }) => (
             <p className="text-white/70 text-xs md:text-sm font-semibold leading-relaxed line-clamp-2 max-w-3xl mb-1">
               {e.desc}
             </p>
-            <button className="text-[#FFD700] text-[10px] md:text-xs font-black hover:underline mb-6 mt-3 uppercase tracking-wide">
+            <a
+              href={youtubeWatchUrl(e.id)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block text-[#FFD700] text-[10px] md:text-xs font-black hover:underline mb-6 mt-3 uppercase tracking-wide"
+            >
               Read Full Brief
-            </button>
+            </a>
           </div>
           <div className="flex flex-wrap items-center justify-between mt-auto pt-2 gap-4">
             <button
@@ -417,15 +357,18 @@ const SpotifyIcon = ({ className: e }) => (
               <ArrowRightIcon className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" />
             </button>
             <div className="flex items-center gap-3">
-              {[AppleIcon, SpotifyIcon, YouTubeIcon].map((Ce_, t) => (
-                <a
-                  href="#"
-                  className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center hover:bg-[#9B26B6] hover:text-white text-white/40 transition-all duration-300 transform hover:-translate-y-1 hover:scale-110 shadow-lg"
-                  key={t}
-                >
-                  <Ce_ className="w-4 h-4 md:w-5 md:h-5 fill-current" />
-                </a>
-              ))}
+              <span className="text-[10px] md:text-xs font-mono font-bold text-white/40">
+                {e.duration}
+              </span>
+              <a
+                href={youtubeWatchUrl(e.id)}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Watch on YouTube"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center hover:bg-[#9B26B6] hover:text-white text-white/40 transition-all duration-300 transform hover:-translate-y-1 hover:scale-110 shadow-lg"
+              >
+                <YouTubeIcon className="w-4 h-4 md:w-5 md:h-5 fill-current" />
+              </a>
             </div>
           </div>
         </div>
@@ -435,7 +378,6 @@ const SpotifyIcon = ({ className: e }) => (
 
 export function Podcasts() {
   const e = React.useRef(null),
-    t = React.useRef(new Audio()),
     { scrollYProgress: n } = useScroll({
       target: e,
       offset: ["start start", "end end"],
@@ -444,51 +386,20 @@ export function Podcasts() {
     i = useTransform(n, [0, 1], ["0%", "10%"]),
     a = useTransform(n, [0.5, 1], ["0%", "-5%"]),
     [s, o] = React.useState(null),
-    [l, c] = React.useState(!1),
-    [u, d] = React.useState(0),
-    [h, f] = React.useState(0),
     [p, m] = React.useState(""),
     [g, x] = React.useState({
       name: "",
       email: "",
     }),
     [b, v] = React.useState("idle");
-  React.useEffect(() => {
-    const e = t.current,
-      n = () => {
-        (f(e.duration), d(e.currentTime));
-      },
-      r = () => d(e.currentTime),
-      i = () => c(!1);
-    return (
-      e.addEventListener("loadeddata", n),
-      e.addEventListener("timeupdate", r),
-      e.addEventListener("ended", i),
-      () => {
-        (e.removeEventListener("loadeddata", n),
-          e.removeEventListener("timeupdate", r),
-          e.removeEventListener("ended", i));
-      }
-    );
-  }, []);
-  const y = (e) => {
-      ((s && s.id === e.id) ||
-        (o(e), (t.current.src = e.audioUrl), t.current.load()),
-        t.current
-          .play()
-          .then(() => {
-            c(!0);
-          })
-          .catch((e) =>
-            console.log("Audio play failed (interaction required first)", e),
-          ));
-    },
+  const y = (e) => o(e),
     w = React.useMemo(
       () =>
         EPISODES.filter(
           (e) =>
             e.title.toLowerCase().includes(p.toLowerCase()) ||
-            e.guest.toLowerCase().includes(p.toLowerCase()),
+            e.guest.toLowerCase().includes(p.toLowerCase()) ||
+            e.desc.toLowerCase().includes(p.toLowerCase()),
         ),
       [p],
     );
@@ -824,30 +735,34 @@ export function Podcasts() {
               </span>
             </div>
             <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-[10px] font-black uppercase tracking-[0.25em] text-white/30">
-              <a href="#" className="hover:text-white transition-colors">
+              <a
+                href="https://x.com/TonyThomps7989"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
                 Twitter
               </a>
-              <a href="#" className="hover:text-white transition-colors">
+              <a
+                href="https://www.instagram.com/tt5481562/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
                 Instagram
               </a>
-              <a href="#" className="hover:text-white transition-colors">
+              <a
+                href="https://www.linkedin.com/in/meettonythompson/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
                 LinkedIn
               </a>
             </div>
           </div>
         </footer>
-        <PlayerBar
-          activeEpisode={s}
-          isPlaying={l}
-          togglePlay={() => {
-            (l ? t.current.pause() : t.current.play(), c(!l));
-          }}
-          currentTime={u}
-          duration={h}
-          onClose={() => {
-            (t.current.pause(), c(!1), o(null));
-          }}
-        />
+        <VideoPlayer activeEpisode={s} onClose={() => o(null)} />
       </main>
     </LayoutGroup>
   );
