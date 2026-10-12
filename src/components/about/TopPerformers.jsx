@@ -19,6 +19,7 @@ import {
   YoutubeIcon,
 } from "lucide-react";
 import React from "react";
+import { sitePath } from "../../utils/sitePath";
 
 const ACCENT = "#A45BE0",
   PROFILES = [
@@ -563,7 +564,7 @@ export function TopPerformers() {
     );
   }, []);
   const l = () => {
-    window.location.href = "/?target=programs";
+    window.location.href = sitePath("/?target=programs");
   };
   return (
     <section className="relative w-full min-h-screen bg-white text-black overflow-hidden font-sans flex items-center justify-center">

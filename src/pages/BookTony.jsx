@@ -1,4 +1,5 @@
 import React from "react";
+import { sitePath } from "../utils/sitePath";
 
 export function BookTony() {
   const [e, t] = React.useState(!1);
@@ -55,7 +56,7 @@ export function BookTony() {
                   body: JSON.stringify(r),
                 },
               );
-              window.location.href = "/thank-you";
+              window.location.href = sitePath("/thank-you");
             } catch (i) {
               (console.error(i),
                 alert("Something went wrong. Please try again."));
@@ -189,7 +190,7 @@ export function BookTony() {
               Msg &amp; data rates may apply. Reply STOP to unsubscribe or HELP
               for assistance. View our{" "}
               <a
-                href="/privacy-policy"
+                href={sitePath("/privacy-policy")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#e8b4fe] underline hover:text-white"
@@ -198,7 +199,7 @@ export function BookTony() {
               </a>{" "}
               and{" "}
               <a
-                href="/terms"
+                href={sitePath("/terms")}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[#e8b4fe] underline hover:text-white"

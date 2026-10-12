@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { CookieIcon, XIcon } from "lucide-react";
 import React from "react";
+import { sitePath } from "../../utils/sitePath";
 
 export function CookieBanner() {
   const [e, t] = React.useState(!1);
@@ -49,7 +50,7 @@ export function CookieBanner() {
                   'We use cookies to enhance your experience, analyze site traffic, and support our growth programs. By clicking "Accept", you agree to our use of cookies as described in our '
                 }
                 <a
-                  href="/cookie-policy"
+                  href={sitePath("/cookie-policy")}
                   className="text-[#9b26b6] hover:underline"
                 >
                   Cookie Policy

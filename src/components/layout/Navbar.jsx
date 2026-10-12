@@ -10,6 +10,7 @@ import ReactDOM from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LOGO_TT } from "../../constants/assets";
 import { useScrollSpy } from "../../hooks/useScrollSpy";
+import { sitePath } from "../../utils/sitePath";
 
 export function Navbar({ menuOpen: e, setMenuOpen: t }) {
   const n = useNavigate(),
@@ -303,7 +304,7 @@ export function Navbar({ menuOpen: e, setMenuOpen: t }) {
                   behavior: "smooth",
                 });
           }
-          window.history.pushState(null, "", `/?target=${e}`);
+          window.history.pushState(null, "", sitePath(`/?target=${e}`));
         } else n(`/?target=${e}`);
       }));
   };
@@ -467,7 +468,9 @@ export function Navbar({ menuOpen: e, setMenuOpen: t }) {
         }}
         onClick={() =>
           (function (e) {
-            const t = "/" === window.location.pathname,
+            const t =
+                window.location.pathname.replace(/\/$/, "") ===
+                sitePath("/").replace(/\/$/, ""),
               n = document.querySelector(
                 "#global-fog, [data-global-fog], .global-fog",
               );

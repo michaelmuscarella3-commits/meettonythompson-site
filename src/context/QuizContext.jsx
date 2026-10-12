@@ -1,4 +1,5 @@
 import React from "react";
+import { sitePath } from "../utils/sitePath";
 
 export const QuizContext = React.createContext({
     openQuiz: () => {},
@@ -7,7 +8,7 @@ export const QuizContext = React.createContext({
     <QuizContext.Provider
       value={{
         openQuiz: () => {
-          window.location.href = "/quiz-intro";
+          window.location.href = sitePath("/quiz-intro");
         },
       }}
     >

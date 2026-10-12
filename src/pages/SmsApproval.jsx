@@ -1,5 +1,6 @@
 import { InfoIcon, MailIcon, PhoneIcon, ShieldCheckIcon } from "lucide-react";
 import React from "react";
+import { sitePath } from "../utils/sitePath";
 
 export function SmsApproval() {
   return (
@@ -73,21 +74,21 @@ export function SmsApproval() {
           </div>
           <div className="flex flex-wrap justify-center gap-4 text-sm font-semibold mb-10">
             <a
-              href="/privacy-policy"
+              href={sitePath("/privacy-policy")}
               className="text-purple-600 underline hover:text-purple-800 transition-colors"
             >
               Privacy Policy
             </a>
             <span className="text-gray-300">|</span>
             <a
-              href="/terms"
+              href={sitePath("/terms")}
               className="text-purple-600 underline hover:text-purple-800 transition-colors"
             >
               Terms & Conditions
             </a>
             <span className="text-gray-300">|</span>
             <a
-              href="/cookie-policy"
+              href={sitePath("/cookie-policy")}
               className="text-purple-600 underline hover:text-purple-800 transition-colors"
             >
               Cookie Policy

@@ -11,6 +11,7 @@ import {
 import React from "react";
 import ReactDOM from "react-dom";
 import { LOGO_TT } from "../../constants/assets";
+import { sitePath } from "../../utils/sitePath";
 
 const VideoPlayerContext = React.createContext();
 
@@ -207,7 +208,7 @@ export function VideoPlayerProvider({ children: e }) {
                               : setTimeout(() => {
                                   w.startsWith("http")
                                     ? window.open(w, "_blank")
-                                    : (window.location.href = w);
+                                    : (window.location.href = sitePath(w));
                                 }, 300));
                         }}
                         className={

@@ -51,6 +51,24 @@ The forms post to the same places as the original site:
 3. Make sure `public_html/.htaccess` sends unknown URLs to `index.html`
    (see `deploy/htaccess.example`), so links like `/book-tony` work on refresh.
 
+## Test copy at /preview (try it on the real server first)
+
+`npm run build:staging` builds a copy of the site that runs from
+`meettonythompson.com/preview/` without touching the live site. It's small (about 2 MB)
+because it reuses the images and videos already on the server. Search engines are told
+not to index it.
+
+1. `npm run build:staging` (output in `dist-staging/`, including a hidden `.htaccess`)
+2. Zip the **contents** of `dist-staging/` (not the folder itself).
+3. In cPanel File Manager, open `public_html`, create a folder named `preview`, open it,
+   **Upload** the zip, then **Extract** it there and delete the zip.
+4. Visit `https://meettonythompson.com/preview/`.
+
+Forms in the test copy are real: they send to the same Google Sheets and Constant Contact
+as the live site, so mark test submissions clearly (e.g. "TEST" as the name).
+
+To remove the test copy, delete the `public_html/preview` folder.
+
 ## Migration status
 
 This is a faithful copy of the live site. Code was recovered from the minified build,

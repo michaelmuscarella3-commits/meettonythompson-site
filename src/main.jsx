@@ -10,7 +10,9 @@ const PerformanceContext = React.createContext("mid");
 function PerformanceProvider({ children }) {
   const tier = usePerformanceTier();
   return (
-    <PerformanceContext.Provider value={tier}>{children}</PerformanceContext.Provider>
+    <PerformanceContext.Provider value={tier}>
+      {children}
+    </PerformanceContext.Provider>
   );
 }
 
@@ -30,7 +32,7 @@ document.documentElement.style.height = "auto";
 
 ReactDOMClient.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <BrowserRouter basename="/">
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <PerformanceProvider>
         <App />
       </PerformanceProvider>

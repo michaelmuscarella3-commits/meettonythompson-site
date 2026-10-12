@@ -10,6 +10,7 @@ import {
 } from "framer-motion";
 import React from "react";
 import { PublicationLink } from "./TrustedByTitans";
+import { sitePath } from "../../utils/sitePath";
 
 function useParallax(e, t) {
   return useTransform(e, [0, 1], [-t, t]);
@@ -306,7 +307,7 @@ const GrowthPlatformPreview = () => {
         (n.set(e.clientX - t.left), r.set(e.clientY - t.top));
       }}
       onClick={() => {
-        window.location.href = "/?target=programs";
+        window.location.href = sitePath("/?target=programs");
       }}
     >
       <span className="absolute -inset-2 bg-[#7d1f97] blur-[8px] opacity-0 group-hover:opacity-40 transition duration-500 rounded-full" />
