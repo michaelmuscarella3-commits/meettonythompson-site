@@ -100,6 +100,30 @@ for (const [name, url] of [["Twitter", "https://x.com/TonyThomps7989"], ["Instag
   once(`X.jsx("a",{href:"#",className:"hover:text-white transition-colors",children:"${name}"})`,
     `X.jsx("a",{href:"${url}",target:"_blank",rel:"noopener noreferrer",className:"hover:text-white transition-colors",children:"${name}"})`);
 
+// ---------- 3. Forms -> GoHighLevel relay (/api/form-relay.php) ----------
+const all = (a, b, n) => {
+  const c = s.split(a).length - 1;
+  if (c !== n) throw new Error(`expected ${n} matches, got ${c}: ${a.slice(0, 80)}`);
+  s = s.split(a).join(b);
+};
+// Book Tony + Inner Circle (the relay tells them apart by form_page)
+all("https://script.google.com/macros/s/AKfycby0sagK38jtnzcxhuiSciGJBVgIU6vj1FFmdUuuy0CtHysKDZbukgyoKcbX23Cb42xz/exec", "/api/form-relay.php", 2);
+all("https://script.google.com/macros/s/AKfycby8XptgBAHSaAuz0k-mVFIeZK0gGH4ZnUN-fymJaKpMNzqU_aopShiLAqpXF8Vw_B3uiQ/exec", "/api/form-relay.php?form=Newsletter", 1);
+all("https://script.google.com/macros/s/AKfycbzhYG9VZXYtkmgJJlBaX3d2yKLt0ZK6PuN08ch9SA5E9WRjMDvmOFVk4wMMmq6tRUPj/exec", "/api/form-relay.php?form=Waitlist%20Aspire", 1);
+all("https://script.google.com/macros/s/AKfycbytdnEfwBgbG6e-Y478MWX07tWz7iq_GxdC3QzoaC0gy-8CDZKJBvQRb7cLrvg3C9zBoQ/exec", "/api/form-relay.php?form=Waitlist%20CCL", 1);
+all("https://script.google.com/macros/s/AKfycbyNk1RgnU_37Nsi40IWR3fTUG1LDtfR0YFdzxxd9P-B9sLafKXYX-HKjkGYuo2muF3p/exec", "/api/form-relay.php?form=Waitlist%20Elevate", 1);
+// Home contact, courses footer, quiz (the relay tells them apart by tier)
+all('"/api/cc-add-contact.php"', '"/api/form-relay.php"', 3);
+if (s.includes("script.google.com/macros")) throw new Error("an Apps Script endpoint is left");
+
+// Podcasts: remove the "Request Access" block, which never sent anything.
+{
+  const st = s.indexOf('X.jsx("section",{className:"relative z-20 bg-[#050005] py-32 px-6 md:px-12 border-t border-white/5"');
+  const ft = s.indexOf('X.jsx("footer",{className:"relative z-20 bg-black', st);
+  if (st < 0 || ft < 0 || !s.slice(st, ft).includes('"Request Access"')) throw new Error("Request Access block not found");
+  s = s.slice(0, st) + s.slice(ft);
+}
+
 const ex = s.lastIndexOf("export{");
 if (ex < 0) throw new Error("export not found");
 s = s.slice(0, ex) + helper + loader + s.slice(ex);

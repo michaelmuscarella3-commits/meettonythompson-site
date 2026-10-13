@@ -35,13 +35,15 @@ and edit them in place.
 
 ## Forms
 
-The forms post to the same places as the original site:
+Every form posts to `public/api/form-relay.php` (deployed as `public_html/api/form-relay.php`),
+which forwards the submission to one shared GoHighLevel workflow (Inbound Webhook trigger) with a
+`form_name` field: Book Tony, Join the Inner Circle, Newsletter, Waitlist Aspire / CCL / Elevate,
+Home Contact Form, Courses Contact Form, Quiz Roadmap. Each submission includes `sms_consent`
+("Yes"/"No"), plus the consent wording, time, page and IP when consent was given.
 
-- **Book Tony** and **Join the Inner Circle** → Google Apps Script web apps (URLs in
-  `src/pages/BookTony.jsx` and `src/pages/JoinInnerCircle.jsx`).
-- **Newsletter, contact, footer and quiz sign-ups** → `/api/cc-add-contact.php` on the same
-  server, which adds the contact to Constant Contact. That PHP code lives on the server
-  (`public_html/api`) and is **not** in this repo, because it holds credentials.
+The webhook URL lives in `form-relay.config.php` in the cPanel home folder (one level above
+`public_html`), see `deploy/form-relay.config.example.php`. If GHL can't be reached, or no URL is
+set, the relay emails the submission to info@meettonythompson.com instead.
 
 ## Deploying to cPanel
 
