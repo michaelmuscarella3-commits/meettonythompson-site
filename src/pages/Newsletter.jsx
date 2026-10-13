@@ -10,8 +10,16 @@ import {
   ChevronRightIcon,
   CircleCheckIcon,
   ClockIcon,
+  ExternalLinkIcon,
+  XIcon,
 } from "lucide-react";
 import React from "react";
+import {
+  NEWSLETTER_ARCHIVE,
+  fetchLatestIssues,
+  formatIssueDate,
+  mergeIssues,
+} from "../data/newsletterIssues";
 import { SmsConsent } from "../components/forms/SmsConsent";
 
 const ACCENT = "#9b26b6",
@@ -89,7 +97,7 @@ const ACCENT = "#9b26b6",
       </div>
     );
   },
-  ArticleCard = ({ article: e, index: t }) => {
+  ArticleCard = ({ article: e, index: t, onOpen }) => {
     const [n, r] = React.useState(!1);
     return (
       <motion.article
@@ -112,6 +120,13 @@ const ACCENT = "#9b26b6",
         whileHover={{
           y: -5,
         }}
+        onClick={() => onOpen(e)}
+        onKeyDown={(n) =>
+          ("Enter" === n.key || " " === n.key) &&
+          (n.preventDefault(), onOpen(e))
+        }
+        role="button"
+        tabIndex={0}
         onHoverStart={() => r(!0)}
         onHoverEnd={() => r(!1)}
         className="group relative bg-black/40 backdrop-blur-md border-2 rounded-xl p-5 md:p-8 transition-all duration-500 cursor-pointer overflow-hidden"
@@ -185,11 +200,11 @@ const ACCENT = "#9b26b6",
                   backgroundColor: n ? `${ACCENT}20` : "rgba(255,255,255,0.05)",
                 }}
               >
-                {e.category}
+                {e.category || "Weekly Journal"}
               </span>
               <span className="flex items-center gap-1 text-white/60 text-xs font-semibold whitespace-nowrap">
                 <ClockIcon className="w-3 h-3" />
-                {e.date}
+                {formatIssueDate(e.date)}
               </span>
             </div>
             <h3 className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight">
@@ -218,6 +233,87 @@ const ACCENT = "#9b26b6",
     );
   };
 
+// Full newsletter issue, shown in a reader over the page.
+function IssueReader({ issue: e, onClose: t }) {
+  React.useEffect(() => {
+    if (!e) return;
+    const n = (n) => "Escape" === n.key && t();
+    const r = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", n);
+    return () => {
+      window.removeEventListener("keydown", n);
+      document.body.style.overflow = r;
+    };
+  }, [e, t]);
+  return (
+    <AnimatePresence>
+      {e && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={t}
+          className="fixed inset-0 flex items-center justify-center p-3 md:p-8"
+          style={{
+            zIndex: 2147483647,
+            background: "rgba(0,0,0,0.85)",
+            backdropFilter: "blur(16px)",
+          }}
+        >
+          <motion.div
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 40, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-3xl h-full flex flex-col rounded-2xl overflow-hidden border-2"
+            style={{ background: "#0a0a0a", borderColor: `${ACCENT}60` }}
+          >
+            <div className="flex items-center justify-between gap-4 px-4 md:px-6 py-3 md:py-4 border-b border-white/10">
+              <div className="min-w-0">
+                <p
+                  className="text-[10px] font-bold uppercase tracking-widest"
+                  style={{ color: ACCENT_LIGHT }}
+                >
+                  Chasing Excellence · {formatIssueDate(e.date)}
+                </p>
+                <h3 className="text-white text-sm md:text-lg font-bold truncate">
+                  {e.title}
+                </h3>
+              </div>
+              <div className="flex items-center gap-4 shrink-0">
+                <a
+                  href={e.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open in a new tab"
+                  className="text-white/50 hover:text-white transition-colors"
+                >
+                  <ExternalLinkIcon className="w-5 h-5" />
+                </a>
+                <button
+                  onClick={t}
+                  aria-label="Close"
+                  className="text-white/50 hover:text-white transition-colors"
+                >
+                  <XIcon className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+            <iframe
+              src={e.url}
+              title={e.title}
+              className="flex-1 w-full bg-white"
+              sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin"
+            />
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export function Newsletter() {
   const [e, t] = React.useState({
       firstName: "",
@@ -231,6 +327,10 @@ export function Newsletter() {
       smsConsent: !1,
     }),
     [n, r] = React.useState("idle"),
+    [issues, setIssues] = React.useState(NEWSLETTER_ARCHIVE),
+    [visible, setVisible] = React.useState(6),
+    [reading, setReading] = React.useState(null),
+    closeReader = React.useCallback(() => setReading(null), []),
     [i, a] = React.useState(""),
     s = React.useRef(null),
     { scrollYProgress: o } = useScroll({
@@ -246,6 +346,17 @@ export function Newsletter() {
       }),
         a(""));
     };
+  React.useEffect(() => {
+    let cancelled = !1;
+    fetchLatestIssues()
+      .then((latest) => {
+        cancelled || setIssues((list) => mergeIssues(list, latest));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = !0;
+    };
+  }, []);
   return (
     <main
       ref={s}
@@ -718,30 +829,13 @@ export function Newsletter() {
             </p>
           </motion.div>
           <div className="space-y-6 md:space-y-8">
-            {[
-              {
-                category: "Strategy",
-                date: "Dec 10, 2024",
-                title: "The Missing Piece in Your Sales Framework",
-                excerpt:
-                  "Discover the overlooked component that separates top performers from average achievers in high-stakes environments.",
-              },
-              {
-                category: "Leadership",
-                date: "Dec 5, 2024",
-                title: "Building Teams That Execute Under Pressure",
-                excerpt:
-                  "The psychology and systems behind creating resilient, high-performance teams that thrive in challenging conditions.",
-              },
-              {
-                category: "Mindset",
-                date: "Nov 28, 2024",
-                title: "The Excellence Equation: Consistency Over Intensity",
-                excerpt:
-                  "Why sustainable success comes from daily discipline, not sporadic bursts of motivation.",
-              },
-            ].map((e, t) => (
-              <ArticleCard article={e} index={t} key={t} />
+            {issues.slice(0, visible).map((e, t) => (
+              <ArticleCard
+                article={e}
+                index={t % 6}
+                onOpen={setReading}
+                key={e.id}
+              />
             ))}
           </div>
           <motion.div
@@ -760,9 +854,13 @@ export function Newsletter() {
               duration: 0.6,
               delay: 0.3,
             }}
-            className="text-center mt-12 md:mt-16"
+            className={
+              "text-center mt-12 md:mt-16 " +
+              (issues.length > 6 ? "" : "hidden")
+            }
           >
             <motion.button
+              onClick={() => setVisible((v) => (v < issues.length ? v + 6 : 6))}
               whileHover={{
                 scale: 1.05,
                 y: -2,
@@ -776,12 +874,15 @@ export function Newsletter() {
                 borderColor: ACCENT_LIGHT,
               }}
             >
-              <span>View Archive</span>
+              <span>
+                {visible < issues.length ? "More Issues" : "Show Fewer"}
+              </span>
               <ChevronRightIcon className="w-5 h-5" />
             </motion.button>
           </motion.div>
         </div>
       </section>
+      <IssueReader issue={reading} onClose={closeReader} />
     </main>
   );
 }
