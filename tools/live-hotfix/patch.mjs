@@ -51,7 +51,7 @@ once('X.jsxs("div",{className:"md:col-span-2 space-y-6 mt-2"',
 const label = (e) => e.episode ? `EP.${e.episode}`
   : new Date(`${e.publishedAt}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase();
 const eps = EPISODES.map((e) => ({
-  id: e.id, label: label(e), title: e.title, guest: e.guest, duration: e.duration, desc: e.desc,
+  id: e.id, label: label(e), title: e.title, guest: e.guest, duration: e.duration, desc: e.desc, publishedAt: e.publishedAt,
   image: `https://i.ytimg.com/vi/${e.id}/hqdefault.jpg`, url: `https://www.youtube.com/watch?v=${e.id}`,
 }));
 const a = s.indexOf("hM=[{id:104"), b = s.indexOf("],fM=", a);
@@ -81,12 +81,27 @@ once('children:X.jsx(e,{className:"w-4 h-4 md:w-5 md:h-5 fill-current"})},t))})]
 once('X.jsx("div",{className:"hidden lg:flex w-12 h-12 items-center justify-center rounded-lg border border-white/10 text-white/40",children:X.jsx(Dw,{className:"w-4 h-4"})})',
   'X.jsx("a",{href:"https://www.youtube.com/@ChasingExcellencewithTony",target:"_blank",rel:"noopener noreferrer","aria-label":"Chasing Excellence on YouTube",className:"hidden lg:flex w-12 h-12 items-center justify-center rounded-lg border border-white/10 text-white/40 hover:text-white transition-colors",children:X.jsx(dM,{className:"w-4 h-4 fill-current"})})');
 
+// Newest uploads from /api/podcast-episodes.php (YouTube feed, refreshed hourly).
+// hM is a module constant, so new episodes are merged into it in place and the
+// page re-renders via a small state bump.
+once("function yM(){const e=B.useRef(null),",
+  "function yM(){const[TTv,TTsv]=B.useState(0);B.useEffect(()=>{let c=!1;TTLoadEpisodes().then(n=>{!c&&n&&TTsv(1)});return()=>{c=!0}},[]);const e=B.useRef(null),");
+once("e.guest.toLowerCase().includes(p.toLowerCase())),[p]);return X.jsx(Gv,",
+  "e.guest.toLowerCase().includes(p.toLowerCase())||(e.desc||\"\").toLowerCase().includes(p.toLowerCase())),[p,TTv]);return X.jsx(Gv,");
+const loader =
+  `function TTLoadEpisodes(){return fetch("/api/podcast-episodes.php",{cache:"no-cache"}).then(r=>r.ok?r.json():{episodes:[]}).then(d=>{` +
+  `const l=Array.isArray(d&&d.episodes)?d.episodes:[],k=new Set(hM.map(e=>e.id)),` +
+  `a=l.filter(e=>e&&e.id&&e.title&&!k.has(e.id)).map(e=>({id:e.id,label:e.episode?"EP."+e.episode:new Date(e.publishedAt+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}).toUpperCase(),` +
+  `title:e.title,guest:"Chasing Excellence with Tony Thompson",duration:"",desc:e.desc||"",publishedAt:e.publishedAt,` +
+  `image:"https://i.ytimg.com/vi/"+e.id+"/hqdefault.jpg",url:"https://www.youtube.com/watch?v="+e.id}));` +
+  `if(!a.length)return!1;const m=[...a,...hM].sort((x,y)=>String(y.publishedAt||"").localeCompare(String(x.publishedAt||"")));hM.splice(0,hM.length,...m);return!0}).catch(()=>!1)}`;
+
 for (const [name, url] of [["Twitter", "https://x.com/TonyThomps7989"], ["Instagram", "https://www.instagram.com/tt5481562/"], ["LinkedIn", "https://www.linkedin.com/in/meettonythompson/"]])
   once(`X.jsx("a",{href:"#",className:"hover:text-white transition-colors",children:"${name}"})`,
     `X.jsx("a",{href:"${url}",target:"_blank",rel:"noopener noreferrer",className:"hover:text-white transition-colors",children:"${name}"})`);
 
 const ex = s.lastIndexOf("export{");
 if (ex < 0) throw new Error("export not found");
-s = s.slice(0, ex) + helper + s.slice(ex);
+s = s.slice(0, ex) + helper + loader + s.slice(ex);
 fs.writeFileSync(OUT, s);
 console.log("patched", SRC.length, "->", OUT, s.length, "bytes");
