@@ -1,6 +1,7 @@
 import { ArrowLeftIcon } from "lucide-react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { SmsConsent } from "../components/forms/SmsConsent";
 
 export const BLUEPRINT_PDF =
     "/assets/Mortgage-Broker-Business-Growth-Blueprint-CBCQidX8.pdf",
@@ -63,6 +64,7 @@ export function JoinInnerCircle() {
               company: r.company.value.trim(),
               source: r.source.value.trim(),
               message: r.message.value.trim(),
+              sms_consent: r.sms_consent.checked ? "Yes" : "No",
               form_page: "Inner Circle Application",
             };
             try {
@@ -178,6 +180,7 @@ export function JoinInnerCircle() {
               className="form-input resize-none"
             />
           </div>
+          <SmsConsent />
           <div className="pt-4">
             <button
               type="submit"

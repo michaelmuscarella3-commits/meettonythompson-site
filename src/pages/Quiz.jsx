@@ -4,6 +4,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { QUESTIONS, RESULTS, StretchText } from "../components/quiz/quizData";
 import { GlassPanel } from "../components/quiz/QuizUI";
+import { SmsConsent } from "../components/forms/SmsConsent";
 
 export function Quiz() {
   const e = useNavigate(),
@@ -20,6 +21,7 @@ export function Quiz() {
     [h, f] = React.useState(!1),
     [p, m] = React.useState(!1),
     [g, x] = React.useState(!1),
+    [smsConsent, setSmsConsent] = React.useState(!1),
     b = QUESTIONS[t],
     v = QUESTIONS.length,
     y = React.useCallback(() => {
@@ -81,6 +83,7 @@ export function Quiz() {
             first: a.name.split(" ")[0] || "",
             last: a.name.split(" ").slice(1).join(" ") || "",
             phone: a.phone,
+            sms_consent: smsConsent ? "Yes" : "No",
             tier: "quiz",
           }),
         }).catch(() => {}),
@@ -92,7 +95,7 @@ export function Quiz() {
         setTimeout(() => {
           (e("/roadmap"), (document.body.style.overflowY = "auto"));
         }, 1500));
-    }, [a, k, e]);
+    }, [a, k, e, smsConsent]);
   return (
     <section className="relative min-h-[100dvh] w-full bg-[#050505] text-white overflow-hidden flex flex-col md:flex-row font-sans">
       <div
@@ -203,6 +206,11 @@ export function Quiz() {
                       )}
                     </div>
                   ))}
+                  <SmsConsent
+                    checked={smsConsent}
+                    onChange={setSmsConsent}
+                    className="pt-2"
+                  />
                   <div className="pt-8">
                     <GlassPanel className="w-full">
                       <button

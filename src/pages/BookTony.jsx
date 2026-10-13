@@ -1,5 +1,6 @@
 import React from "react";
 import { sitePath } from "../utils/sitePath";
+import { SmsConsent } from "../components/forms/SmsConsent";
 
 export function BookTony() {
   const [e, t] = React.useState(!1);
@@ -176,39 +177,7 @@ export function BookTony() {
               className="form-input resize-none"
             />
           </div>
-          <label className="flex items-start gap-4 cursor-pointer">
-            <input
-              type="checkbox"
-              name="sms_consent"
-              value="yes"
-              className="mt-1 h-5 w-5 shrink-0 cursor-pointer accent-[#9b26b6]"
-            />
-            <span className="text-sm leading-relaxed text-white/70">
-              By checking this box, I agree to receive SMS text messages from
-              Meet Tony Thompson, including appointment reminders, customer
-              support updates, and promotional offers. Message frequency varies.
-              Msg &amp; data rates may apply. Reply STOP to unsubscribe or HELP
-              for assistance. View our{" "}
-              <a
-                href={sitePath("/privacy-policy")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#e8b4fe] underline hover:text-white"
-              >
-                Privacy Policy
-              </a>{" "}
-              and{" "}
-              <a
-                href={sitePath("/terms")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#e8b4fe] underline hover:text-white"
-              >
-                Terms
-              </a>
-              .
-            </span>
-          </label>
+          <SmsConsent />
           <button
             type="submit"
             disabled={e}

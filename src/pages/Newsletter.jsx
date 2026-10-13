@@ -12,6 +12,7 @@ import {
   ClockIcon,
 } from "lucide-react";
 import React from "react";
+import { SmsConsent } from "../components/forms/SmsConsent";
 
 const ACCENT = "#9b26b6",
   ACCENT_LIGHT = "#d069f0",
@@ -227,6 +228,7 @@ export function Newsletter() {
       phone: "",
       city: "",
       state: "",
+      smsConsent: !1,
     }),
     [n, r] = React.useState("idle"),
     [i, a] = React.useState(""),
@@ -368,6 +370,7 @@ export function Newsletter() {
                             jobTitle: e.jobTitle,
                             company: e.company,
                             phone: e.phone,
+                            sms_consent: e.smsConsent ? "Yes" : "No",
                             city: e.city,
                             state: e.state,
                           }),
@@ -383,6 +386,7 @@ export function Newsletter() {
                           phone: "",
                           city: "",
                           state: "",
+                          smsConsent: !1,
                         }));
                     } catch (i) {
                       (console.error(i),
@@ -473,6 +477,16 @@ export function Newsletter() {
                     value={e.state}
                     onChange={u}
                     placeholder="NY"
+                  />
+                  <SmsConsent
+                    checked={e.smsConsent}
+                    onChange={(n) =>
+                      t((e) => ({
+                        ...e,
+                        smsConsent: n,
+                      }))
+                    }
+                    className="md:col-span-2"
                   />
                   <div className="md:col-span-2 space-y-6 mt-2">
                     {i && (
