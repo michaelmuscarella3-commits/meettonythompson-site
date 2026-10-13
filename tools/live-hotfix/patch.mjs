@@ -3,6 +3,13 @@
 // 2) Real Chasing Excellence episodes on /podcasts, played via YouTube embed
 import fs from "fs";
 import { EPISODES } from "../../src/data/podcastEpisodes.js";
+const SEO = JSON.parse(fs.readFileSync(new URL("../../src/data/seo.json", import.meta.url), "utf8"));
+// applySeo() from the rebuilt site, renamed for injection into the bundle.
+const APPLY_SEO = fs
+  .readFileSync(new URL("../../src/utils/applySeo.js", import.meta.url), "utf8")
+  .replace(/^\/\/.*\n/gm, "")
+  .replace("export function applySeo(", "function TTApplySeo(");
+if (!APPLY_SEO.includes("function TTApplySeo(")) throw new Error("applySeo not found");
 const NEWSLETTER_ARCHIVE = JSON.parse(
   fs.readFileSync(new URL("../../src/data/newsletterArchive.json", import.meta.url), "utf8"),
 );
@@ -168,8 +175,14 @@ const nlFns =
   `X.jsx("button",{onClick:t,"aria-label":"Close",className:"text-white/50 hover:text-white transition-colors",children:X.jsx(Uw,{size:22})})]})]}),` +
   `X.jsx("iframe",{src:e.url,title:e.title,className:"flex-1 w-full bg-white",sandbox:"allow-popups allow-popups-to-escape-sandbox allow-same-origin"})]})})}`;
 
+// ---------- 5. SEO: per-page title, description, canonical, robots ----------
+once("children:[X.jsx(BS,{}),", "children:[X.jsx(BS,{}),X.jsx(TTSeoRoute,{}),");
+const seoFns =
+  "var TT_SEO=" + J(SEO) + ";" + APPLY_SEO +
+  "function TTSeoRoute(){const l=Gd();B.useEffect(()=>{TTApplySeo(l.pathname,TT_SEO)},[l.pathname]);return null}";
+
 const ex = s.lastIndexOf("export{");
 if (ex < 0) throw new Error("export not found");
-s = s.slice(0, ex) + helper + loader + nlData + nlFns + s.slice(ex);
+s = s.slice(0, ex) + helper + loader + nlData + nlFns + seoFns + s.slice(ex);
 fs.writeFileSync(OUT, s);
 console.log("patched", SRC.length, "->", OUT, s.length, "bytes");
