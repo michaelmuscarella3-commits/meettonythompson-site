@@ -3,6 +3,9 @@
 // 2) Real Chasing Excellence episodes on /podcasts, played via YouTube embed
 import fs from "fs";
 import { EPISODES } from "../../src/data/podcastEpisodes.js";
+const NEWSLETTER_ARCHIVE = JSON.parse(
+  fs.readFileSync(new URL("../../src/data/newsletterArchive.json", import.meta.url), "utf8"),
+);
 const [, , SRC, OUT] = process.argv;
 let s = fs.readFileSync(SRC, "utf8");
 const once = (a, b) => {
@@ -124,8 +127,49 @@ if (s.includes("script.google.com/macros")) throw new Error("an Apps Script endp
   s = s.slice(0, st) + s.slice(ft);
 }
 
+// ---------- 4. Newsletter page: real Chasing Excellence issues ----------
+// Stored issues come from src/data/newsletterArchive.json (pages in
+// /newsletters/); newer ones from /api/newsletters.php.
+once("function SM(){const[e,t]=B.useState(",
+  "function SM(){const[TNi,TNs]=B.useState(TT_NL),[TNv,TNsv]=B.useState(6),[TNr,TNsr]=B.useState(null);" +
+  "B.useEffect(()=>{let c=!1;TTLoadIssues().then(l=>{!c&&l.length&&TNs(x=>TTMergeIssues(x,l))});return()=>{c=!0}},[]);" +
+  "const[e,t]=B.useState(");
+{
+  const i = s.indexOf('category:"Strategy",date:"Dec 10, 2024"');
+  const a = s.lastIndexOf("children:[{", i);
+  const tail = "].map((e,t)=>X.jsx(jM,{article:e,index:t},t))";
+  const j = s.indexOf(tail, i);
+  if (i < 0 || a < 0 || j < 0 || j - a > 2000) throw new Error("placeholder articles not found");
+  s = s.slice(0, a) + "children:TNi.slice(0,TNv).map((e,t)=>X.jsx(jM,{article:e,index:t%6,onOpen:TNsr},e.id))" + s.slice(j + tail.length);
+}
+once("jM=({article:e,index:t})=>{", "jM=({article:e,index:t,onOpen:TO})=>{");
+once("onHoverStart:()=>r(!0),onHoverEnd:()=>r(!1),className:\"group relative bg-black/40",
+  "onClick:()=>TO&&TO(e),role:\"button\",tabIndex:0,onHoverStart:()=>r(!0),onHoverEnd:()=>r(!1),className:\"group relative bg-black/40");
+once('[X.jsx(iw,{className:"w-3 h-3"}),e.date]', '[X.jsx(iw,{className:"w-3 h-3"}),TTFmtDate(e.date)]');
+once('className:"text-center mt-12 md:mt-16",children:X.jsxs(Fv.button,{whileHover:{scale:1.05,y:-2},',
+  'className:"text-center mt-12 md:mt-16"+(TNi.length>6?"":" hidden"),children:[TNr&&nd.createPortal(X.jsx(TTIssueReader,{issue:TNr,onClose:()=>TNsr(null)}),document.body),X.jsxs(Fv.button,{onClick:()=>TNsv(v=>v<TNi.length?v+6:6),whileHover:{scale:1.05,y:-2},');
+once('{children:"View Archive"}),X.jsx(nw,{className:"w-5 h-5"})]})})',
+  '{children:TNv<TNi.length?"More Issues":"Show Fewer"}),X.jsx(nw,{className:"w-5 h-5"})]})]})');
+
+const nlData = "var TT_NL=" + J(NEWSLETTER_ARCHIVE.map((e) => ({ ...e, category: "Weekly Journal" }))) + ";";
+const nlFns =
+  `function TTFmtDate(d){return/^\\d{4}-\\d\\d-\\d\\d$/.test(d||"")?new Date(d+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):d}` +
+  `function TTLoadIssues(){return fetch("/api/newsletters.php",{cache:"no-cache"}).then(r=>r.ok?r.json():{issues:[]}).then(d=>Array.isArray(d&&d.issues)?d.issues:[]).catch(()=>[])}` +
+  `function TTMergeIssues(a,l){const k=new Set(a.map(e=>e.id)),n=l.filter(e=>e&&e.id&&e.title&&e.url&&!k.has(e.id)).map(e=>({...e,category:"Weekly Journal"}));` +
+  `return n.length?[...n,...a].sort((x,y)=>String(y.date).localeCompare(String(x.date))):a}` +
+  `function TTIssueReader({issue:e,onClose:t}){B.useEffect(()=>{const n=n=>{"Escape"===n.key&&t()},r=document.body.style.overflow;document.body.style.overflow="hidden";` +
+  `window.addEventListener("keydown",n);return()=>{window.removeEventListener("keydown",n);document.body.style.overflow=r}},[t]);` +
+  `return X.jsx("div",{onClick:t,className:"fixed inset-0 flex items-center justify-center p-3 md:p-8",style:{zIndex:2147483647,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(16px)"},` +
+  `children:X.jsxs("div",{onClick:e=>e.stopPropagation(),className:"w-full max-w-3xl h-full flex flex-col rounded-2xl overflow-hidden border-2",style:{background:"#0a0a0a",borderColor:"#9b26b660"},children:[` +
+  `X.jsxs("div",{className:"flex items-center justify-between gap-4 px-4 md:px-6 py-3 md:py-4 border-b border-white/10",children:[` +
+  `X.jsxs("div",{className:"min-w-0",children:[X.jsx("p",{className:"text-[10px] font-bold uppercase tracking-widest",style:{color:"#d069f0"},children:"Chasing Excellence · "+TTFmtDate(e.date)}),` +
+  `X.jsx("h3",{className:"text-white text-sm md:text-lg font-bold truncate",children:e.title})]}),` +
+  `X.jsxs("div",{className:"flex items-center gap-4 shrink-0",children:[X.jsx("a",{href:e.url,target:"_blank",rel:"noopener noreferrer",className:"text-white/50 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest",children:"Open ↗"}),` +
+  `X.jsx("button",{onClick:t,"aria-label":"Close",className:"text-white/50 hover:text-white transition-colors",children:X.jsx(Uw,{size:22})})]})]}),` +
+  `X.jsx("iframe",{src:e.url,title:e.title,className:"flex-1 w-full bg-white",sandbox:"allow-popups allow-popups-to-escape-sandbox allow-same-origin"})]})})}`;
+
 const ex = s.lastIndexOf("export{");
 if (ex < 0) throw new Error("export not found");
-s = s.slice(0, ex) + helper + loader + s.slice(ex);
+s = s.slice(0, ex) + helper + loader + nlData + nlFns + s.slice(ex);
 fs.writeFileSync(OUT, s);
 console.log("patched", SRC.length, "->", OUT, s.length, "bytes");
