@@ -123,7 +123,7 @@ export function StackBuilder() {
           t = ((e) => {
             const t = e.filter((e) => !e.every((e) => e)),
               n = m - t.length;
-            for (; t.length < m;) t.unshift(Array(p).fill(0));
+            for (; t.length < m; ) t.unshift(Array(p).fill(0));
             return (n > 0 && (o((e) => e + 100 * n), k()), t);
           })(e);
         r(t);

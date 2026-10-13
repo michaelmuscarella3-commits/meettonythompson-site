@@ -355,27 +355,24 @@ export function Newsletter() {
                   ) {
                     r("loading");
                     try {
-                      (await fetch(
-                        "https://script.google.com/macros/s/AKfycby8XptgBAHSaAuz0k-mVFIeZK0gGH4ZnUN-fymJaKpMNzqU_aopShiLAqpXF8Vw_B3uiQ/exec",
-                        {
-                          method: "POST",
-                          mode: "no-cors",
-                          headers: {
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify({
-                            firstName: e.firstName,
-                            lastName: e.lastName,
-                            email: e.email,
-                            jobTitle: e.jobTitle,
-                            company: e.company,
-                            phone: e.phone,
-                            sms_consent: e.smsConsent ? "Yes" : "No",
-                            city: e.city,
-                            state: e.state,
-                          }),
+                      (await fetch("/api/form-relay.php?form=Newsletter", {
+                        method: "POST",
+                        mode: "no-cors",
+                        headers: {
+                          "Content-Type": "application/json",
                         },
-                      ),
+                        body: JSON.stringify({
+                          firstName: e.firstName,
+                          lastName: e.lastName,
+                          email: e.email,
+                          jobTitle: e.jobTitle,
+                          company: e.company,
+                          phone: e.phone,
+                          sms_consent: e.smsConsent ? "Yes" : "No",
+                          city: e.city,
+                          state: e.state,
+                        }),
+                      }),
                         r("success"),
                         t({
                           firstName: "",

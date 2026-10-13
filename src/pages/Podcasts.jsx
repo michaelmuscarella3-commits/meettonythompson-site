@@ -6,9 +6,7 @@ import {
   useTransform,
 } from "framer-motion";
 import {
-  ActivityIcon,
   ArrowRightIcon,
-  CircleCheckIcon,
   PlayIcon,
   RadioIcon,
   SearchIcon,
@@ -74,61 +72,6 @@ const YouTubeIcon = ({ className: e }) => (
       {e}
     </span>
   ),
-  PlatformButton = ({
-    label: e,
-    name: t,
-    type: n = "text",
-    value: r = "",
-    onChange: i,
-  }) => {
-    const [a, s] = React.useState(!1);
-    return (
-      <div className="relative w-full group mb-8">
-        <div className="flex justify-between items-center mb-2">
-          <label
-            htmlFor={t}
-            className={
-              "text-[10px] font-bold uppercase tracking-[0.2em] transition-colors duration-300 " +
-              (a ? "text-[#FFD700]" : "text-white/40")
-            }
-          >
-            {e}
-          </label>
-          <motion.div
-            animate={{
-              opacity: a ? 1 : 0,
-            }}
-            className="w-1.5 h-1.5 bg-[#FFD700] rounded-full shadow-[0_0_10px_#FFD700]"
-          />
-        </div>
-        <div className="relative">
-          <div
-            className={
-              "absolute left-0 top-0 bottom-0 w-[1px] bg-white/10 transition-all duration-300 " +
-              (a ? "h-full bg-[#FFD700]" : "h-2/3 top-1/6")
-            }
-          />
-          <input
-            type={n}
-            name={t}
-            id={t}
-            value={r}
-            onChange={i}
-            onFocus={() => s(!0)}
-            onBlur={() => s(!1)}
-            className="w-full bg-white/5 border-none py-4 px-4 text-lg md:text-xl text-white font-bold focus:outline-none focus:bg-white/10 transition-colors duration-300 placeholder-transparent font-mono"
-            placeholder={e}
-          />
-          <div
-            className={
-              "absolute right-0 top-0 bottom-0 w-[1px] bg-white/10 transition-all duration-300 " +
-              (a ? "h-full bg-[#FFD700]" : "h-2/3 top-1/6")
-            }
-          />
-        </div>
-      </div>
-    );
-  },
   FeaturedEpisode = ({ episode: t, onPlay: e }) => {
     return (
       <motion.div
@@ -388,11 +331,6 @@ export function Podcasts() {
     a = useTransform(n, [0.5, 1], ["0%", "-5%"]),
     [s, o] = React.useState(null),
     [p, m] = React.useState(""),
-    [g, x] = React.useState({
-      name: "",
-      email: "",
-    }),
-    [b, v] = React.useState("idle"),
     [episodes, setEpisodes] = React.useState(EPISODES);
   React.useEffect(() => {
     let cancelled = !1;
@@ -637,105 +575,6 @@ export function Podcasts() {
                 <span className="text-[#FFD700]">→</span>
                 <span>To The 1%</span>
               </div>
-            </div>
-          </div>
-        </section>
-        <section className="relative z-20 bg-[#050005] py-32 px-6 md:px-12 border-t border-white/5">
-          <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.2fr,0.8fr] gap-12 lg:gap-20 items-stretch">
-            <div className="max-w-full lg:max-w-5xl lg:pr-16 flex flex-col justify-between h-full py-4 md:py-6">
-              <div className="flex flex-col scale-y-[1.2] lg:scale-y-[1.4] origin-top-left mb-16 lg:mb-0">
-                <SplitText
-                  text="JOIN THE"
-                  color="text-white"
-                  className="text-4xl sm:text-5xl md:text-[clamp(3rem,5vw,7rem)] !whitespace-normal"
-                />
-                <SplitText
-                  text="INNER CIRCLE"
-                  color="text-[#9B26B6]"
-                  className="text-4xl sm:text-5xl md:text-[clamp(3rem,5vw,7rem)] -mt-2 md:-mt-2 lg:-mt-4 !whitespace-normal"
-                />
-              </div>
-              <p className="text-white/60 text-base md:text-xl font-bold leading-relaxed max-w-[95%] md:max-w-xl">
-                Access the tactical breakdowns from every episode. No spam. Just
-                high-signal intelligence delivered to your terminal.
-              </p>
-            </div>
-            <div className="relative">
-              {"success" === b ? (
-                <motion.div
-                  initial={{
-                    opacity: 0,
-                  }}
-                  animate={{
-                    opacity: 1,
-                  }}
-                  className="h-[400px] flex flex-col justify-center items-center text-center p-12 border border-[#FFD700]/30 bg-[#FFD700]/5 backdrop-blur-md rounded-xl relative overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,215,0,0.1)_50%,transparent_75%)] bg-[length:250%_250%] animate-shimmer" />
-                  <CircleCheckIcon className="w-16 h-16 text-[#FFD700] mb-6" />
-                  <h3 className="text-2xl font-black text-white uppercase tracking-widest mb-2">
-                    Access Granted
-                  </h3>
-                  <p className="font-mono text-[#FFD700] text-sm">
-                    Welcome to the 1%.
-                  </p>
-                </motion.div>
-              ) : (
-                <div className="relative p-6 md:p-10 border border-white/10 bg-white/5 backdrop-blur-sm overflow-hidden group/form h-full flex flex-col justify-center min-h-[400px]">
-                  <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#FFD700]/50 to-transparent -translate-x-full group-hover/form:animate-[scan_2s_ease-in-out_infinite]" />
-                  <div className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2 border-[#9B26B6]" />
-                  <div className="absolute top-0 right-0 w-4 h-4 border-r-2 border-t-2 border-[#9B26B6]" />
-                  <div className="absolute bottom-0 left-0 w-4 h-4 border-l-2 border-b-2 border-[#9B26B6]" />
-                  <div className="absolute bottom-0 right-0 w-4 h-4 border-r-2 border-b-2 border-[#9B26B6]" />
-                  <form
-                    onSubmit={(e) => {
-                      (e.preventDefault(),
-                        g.name &&
-                          g.email &&
-                          (v("loading"), setTimeout(() => v("success"), 2e3)));
-                    }}
-                  >
-                    <PlatformButton
-                      label="Your Name"
-                      name="name"
-                      value={g.name}
-                      onChange={(e) =>
-                        x({
-                          ...g,
-                          name: e.target.value,
-                        })
-                      }
-                    />
-                    <PlatformButton
-                      label="Secure Email"
-                      name="email"
-                      type="email"
-                      value={g.email}
-                      onChange={(e) =>
-                        x({
-                          ...g,
-                          email: e.target.value,
-                        })
-                      }
-                    />
-                    <div className="mt-12">
-                      <button
-                        disabled={"loading" === b}
-                        className="w-full bg-[#FFD700] text-black py-4 font-black uppercase tracking-[0.2em] hover:bg-white transition-colors flex items-center justify-center gap-4 relative overflow-hidden group"
-                      >
-                        <span className="relative z-10 flex items-center gap-2">
-                          {"loading" === b ? (
-                            <ActivityIcon className="animate-spin" />
-                          ) : (
-                            <TerminalIcon size={18} />
-                          )}
-                          {"loading" === b ? "Processing..." : "Request Access"}
-                        </span>
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
             </div>
           </div>
         </section>

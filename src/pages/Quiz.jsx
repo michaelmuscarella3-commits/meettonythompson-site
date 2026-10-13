@@ -73,7 +73,7 @@ export function Quiz() {
     _ = React.useCallback(async () => {
       k() &&
         (d(!0),
-        fetch("/api/cc-add-contact.php", {
+        fetch("/api/form-relay.php", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -24,11 +24,9 @@ export function WaitlistModal({ show: e, onClose: t, tier: n }) {
     e || v();
   }, [e, v]);
   const y = {
-    aspire:
-      "https://script.google.com/macros/s/AKfycbzhYG9VZXYtkmgJJlBaX3d2yKLt0ZK6PuN08ch9SA5E9WRjMDvmOFVk4wMMmq6tRUPj/exec",
-    ccl: "https://script.google.com/macros/s/AKfycbytdnEfwBgbG6e-Y478MWX07tWz7iq_GxdC3QzoaC0gy-8CDZKJBvQRb7cLrvg3C9zBoQ/exec",
-    elevate:
-      "https://script.google.com/macros/s/AKfycbyNk1RgnU_37Nsi40IWR3fTUG1LDtfR0YFdzxxd9P-B9sLafKXYX-HKjkGYuo2muF3p/exec",
+    aspire: "/api/form-relay.php?form=Waitlist%20Aspire",
+    ccl: "/api/form-relay.php?form=Waitlist%20CCL",
+    elevate: "/api/form-relay.php?form=Waitlist%20Elevate",
   };
   return e ? (
     <AnimatePresence>

@@ -46,17 +46,14 @@ export function BookTony() {
               form_page: "Book Tony Form",
             };
             try {
-              await fetch(
-                "https://script.google.com/macros/s/AKfycby0sagK38jtnzcxhuiSciGJBVgIU6vj1FFmdUuuy0CtHysKDZbukgyoKcbX23Cb42xz/exec",
-                {
-                  method: "POST",
-                  mode: "no-cors",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify(r),
+              await fetch("/api/form-relay.php", {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                  "Content-Type": "application/json",
                 },
-              );
+                body: JSON.stringify(r),
+              });
               window.location.href = sitePath("/thank-you");
             } catch (i) {
               (console.error(i),

@@ -264,7 +264,7 @@ export function ContactSection({ isDark: e = !1 }) {
                         ) {
                           i("loading");
                           try {
-                            const e = await fetch("/api/cc-add-contact.php", {
+                            const e = await fetch("/api/form-relay.php", {
                               method: "POST",
                               headers: {
                                 "Content-Type": "application/json",

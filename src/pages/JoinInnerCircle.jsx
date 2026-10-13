@@ -68,17 +68,14 @@ export function JoinInnerCircle() {
               form_page: "Inner Circle Application",
             };
             try {
-              (await fetch(
-                "https://script.google.com/macros/s/AKfycby0sagK38jtnzcxhuiSciGJBVgIU6vj1FFmdUuuy0CtHysKDZbukgyoKcbX23Cb42xz/exec",
-                {
-                  method: "POST",
-                  mode: "no-cors",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify(a),
+              (await fetch("/api/form-relay.php", {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                  "Content-Type": "application/json",
                 },
-              ),
+                body: JSON.stringify(a),
+              }),
                 setTimeout(() => {
                   e("/inner-circle-success");
                 }, 1e3));

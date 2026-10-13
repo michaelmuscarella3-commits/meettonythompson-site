@@ -157,7 +157,7 @@ export function CoursesFooter() {
                 if ((n.preventDefault(), e.first.trim() && e.email.trim())) {
                   r("loading");
                   try {
-                    const n = await fetch("/api/cc-add-contact.php", {
+                    const n = await fetch("/api/form-relay.php", {
                       method: "POST",
                       headers: {
                         "Content-Type": "application/json",

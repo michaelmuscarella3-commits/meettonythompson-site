@@ -1,0 +1,166 @@
+<?php
+/**
+ * Website form relay -> GoHighLevel.
+ *
+ * Every form on meettonythompson.com posts here (JSON body). The submission is
+ * cleaned up and forwarded to one GHL "Inbound Webhook" workflow, with
+ * `form_name` saying which form it came from. If GHL can't be reached, the
+ * submission is emailed to the team instead so no lead is lost.
+ *
+ * Settings live in form-relay.config.php, OUTSIDE public_html (one folder
+ * above it), so the webhook address is never downloadable:
+ *
+ *   <?php return [
+ *     'ghl_webhook_url' => 'https://services.leadconnectorhq.com/hooks/...',
+ *     'fallback_email'  => 'info@meettonythompson.com',
+ *   ];
+ */
+
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store');
+
+function reply(int $status, array $body): void
+{
+    http_response_code($status);
+    echo json_encode($body);
+    exit;
+}
+
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+    reply(405, ['success' => false, 'error' => 'POST only']);
+}
+
+// Only accept submissions from this site's own pages.
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$host = strtolower(preg_replace('/^www\./', '', $_SERVER['HTTP_HOST'] ?? ''));
+if ($origin !== '') {
+    $originHost = strtolower(preg_replace('/^www\./', '', (string) parse_url($origin, PHP_URL_HOST)));
+    if ($originHost !== $host && !str_starts_with($host, $originHost . ':')) {
+        reply(403, ['success' => false, 'error' => 'Forbidden']);
+    }
+}
+
+$raw = file_get_contents('php://input', false, null, 0, 20000);
+$in = json_decode((string) $raw, true);
+if (!is_array($in)) {
+    reply(400, ['success' => false, 'error' => 'Bad request']);
+}
+
+// ---- Settings ---------------------------------------------------------------
+$configFile = getenv('FORM_RELAY_CONFIG') ?: dirname(__DIR__, 2) . '/form-relay.config.php';
+if (!is_readable($configFile)) {
+    $configFile = __DIR__ . '/form-relay.config.php';
+}
+$config = is_readable($configFile) ? (include $configFile) : [];
+$webhook = is_array($config) ? trim((string) ($config['ghl_webhook_url'] ?? '')) : '';
+$fallbackEmail = is_array($config) ? trim((string) ($config['fallback_email'] ?? '')) : '';
+if ($fallbackEmail === '') {
+    $fallbackEmail = 'info@meettonythompson.com';
+}
+
+// ---- Normalize --------------------------------------------------------------
+$pick = function (array $keys) use ($in): string {
+    foreach ($keys as $k) {
+        if (isset($in[$k]) && is_scalar($in[$k]) && trim((string) $in[$k]) !== '') {
+            return trim((string) $in[$k]);
+        }
+    }
+    return '';
+};
+
+// Which form: ?form=..., else known markers in the body.
+$formNames = [
+    'Book Tony Form' => 'Book Tony',
+    'Inner Circle Application' => 'Join the Inner Circle',
+    'footer' => 'Home Contact Form',
+    'courses_footer' => 'Courses Contact Form',
+    'quiz' => 'Quiz Roadmap',
+];
+$form = trim((string) ($_GET['form'] ?? ''));
+if ($form === '') {
+    $marker = $pick(['form_page', 'tier']);
+    $form = $formNames[$marker] ?? ($marker !== '' ? $marker : 'Website Form');
+}
+$form = mb_substr(preg_replace('/[^\p{L}\p{N} &\-]/u', '', $form), 0, 60);
+
+$first = $pick(['first_name', 'firstName', 'first']);
+$last = $pick(['last_name', 'lastName', 'last']);
+$full = $pick(['full_name', 'name']);
+if ($first === '' && $full !== '') {
+    $parts = preg_split('/\s+/', $full, 2);
+    $first = $parts[0];
+    $last = $last !== '' ? $last : ($parts[1] ?? '');
+}
+$email = $pick(['email']);
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    reply(422, ['success' => false, 'error' => 'A valid email is required']);
+}
+$consent = strtolower($pick(['sms_consent'])) === 'yes' ? 'Yes' : 'No';
+
+$out = [
+    'form_name' => $form,
+    'first_name' => $first,
+    'last_name' => $last,
+    'full_name' => trim("$first $last"),
+    'email' => $email,
+    'phone' => $pick(['phone']),
+    'company_name' => $pick(['company']),
+    'message' => $pick(['message', 'enquiry']),
+    'sms_consent' => $consent,
+    'submitted_at' => gmdate('c'),
+    'page_url' => (string) ($_SERVER['HTTP_REFERER'] ?? ''),
+    'ip_address' => (string) ($_SERVER['REMOTE_ADDR'] ?? ''),
+    'user_agent' => mb_substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 300),
+];
+if ($consent === 'Yes') {
+    $out['sms_consent_text'] = 'By checking this box, I agree to receive SMS text messages from Meet Tony Thompson, including appointment reminders, customer support updates, and promotional offers. Message frequency varies. Msg & data rates may apply. Reply STOP to unsubscribe or HELP for assistance.';
+}
+// Everything else the form sent (event date, budget, job title, plan, ...).
+$skip = ['first_name', 'firstName', 'first', 'last_name', 'lastName', 'last', 'full_name', 'name',
+    'email', 'phone', 'company', 'message', 'enquiry', 'sms_consent', 'form_page', 'bot_field'];
+foreach ($in as $k => $v) {
+    if (in_array($k, $skip, true) || !is_scalar($v) || !preg_match('/^[A-Za-z0-9_]{1,40}$/', (string) $k)) {
+        continue;
+    }
+    $key = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', (string) $k));
+    if (!isset($out[$key])) {
+        $out[$key] = mb_substr(trim((string) $v), 0, 2000);
+    }
+}
+
+// ---- Deliver ----------------------------------------------------------------
+$delivered = false;
+if ($webhook !== '' && (str_starts_with($webhook, 'https://') || getenv('FORM_RELAY_TEST'))) {
+    $ch = curl_init($webhook);
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($out, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 10,
+    ]);
+    curl_exec($ch);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    $delivered = $code >= 200 && $code < 300;
+}
+
+if (!$delivered) {
+    // Safety net: email the submission to the team.
+    $lines = [];
+    foreach ($out as $k => $v) {
+        $lines[] = str_pad($k . ':', 18) . str_replace(["\r", "\n"], ' ', (string) $v);
+    }
+    $domain = preg_replace('/:\d+$/', '', $host) ?: 'meettonythompson.com';
+    $safeEmail = str_replace(["\r", "\n"], '', $email);
+    $headers = "From: Website Forms <noreply@{$domain}>\r\nReply-To: {$safeEmail}\r\nContent-Type: text/plain; charset=UTF-8";
+    $subject = "New {$form} submission (GHL delivery failed)";
+    $mailer = getenv('FORM_RELAY_TEST_MAILBOX');
+    if ($mailer) {
+        $delivered = (bool) file_put_contents($mailer, "To: $fallbackEmail\nSubject: $subject\n$headers\n\n" . implode("\n", $lines) . "\n\n", FILE_APPEND);
+    } else {
+        $delivered = mail($fallbackEmail, $subject, implode("\n", $lines), $headers);
+    }
+}
+
+reply($delivered ? 200 : 502, ['success' => $delivered]);
