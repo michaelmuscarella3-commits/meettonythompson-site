@@ -19,6 +19,8 @@ import {
 import React from "react";
 import {
   EPISODES,
+  fetchLatestEpisodes,
+  mergeEpisodes,
   PODCAST_CHANNEL_URL,
   youtubeThumbnail,
   youtubeWatchUrl,
@@ -127,8 +129,7 @@ const YouTubeIcon = ({ className: e }) => (
       </div>
     );
   },
-  FeaturedEpisode = ({ onPlay: e }) => {
-    const t = EPISODES[0];
+  FeaturedEpisode = ({ episode: t, onPlay: e }) => {
     return (
       <motion.div
         initial={{
@@ -391,17 +392,29 @@ export function Podcasts() {
       name: "",
       email: "",
     }),
-    [b, v] = React.useState("idle");
+    [b, v] = React.useState("idle"),
+    [episodes, setEpisodes] = React.useState(EPISODES);
+  React.useEffect(() => {
+    let cancelled = !1;
+    fetchLatestEpisodes()
+      .then((latest) => {
+        cancelled || setEpisodes((list) => mergeEpisodes(list, latest));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = !0;
+    };
+  }, []);
   const y = (e) => o(e),
     w = React.useMemo(
       () =>
-        EPISODES.filter(
+        episodes.filter(
           (e) =>
             e.title.toLowerCase().includes(p.toLowerCase()) ||
             e.guest.toLowerCase().includes(p.toLowerCase()) ||
             e.desc.toLowerCase().includes(p.toLowerCase()),
         ),
-      [p],
+      [p, episodes],
     );
   return (
     <LayoutGroup>
@@ -474,7 +487,7 @@ export function Podcasts() {
           </motion.div>
           <div className="absolute bottom-8 left-6 right-6 md:left-auto md:bottom-12 md:right-16 z-40 flex justify-center md:block pointer-events-none md:pointer-events-auto">
             <div className="pointer-events-auto">
-              <FeaturedEpisode onPlay={y} />
+              <FeaturedEpisode episode={episodes[0]} onPlay={y} />
             </div>
           </div>
           <motion.div

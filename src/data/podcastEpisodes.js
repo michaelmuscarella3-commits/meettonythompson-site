@@ -282,3 +282,36 @@ export const EPISODES = [
     desc: "In this episode of Chasing Excellence, host Tony Thompson sits down with Shawn Smith — broker-owner of Sublime Financial, a Dallas-based mortgage brokerage generating $200M in annual volume with 23 loan officers licensed across Texas, Oklahoma, Washington State, and Florida.",
   },
 ];
+
+// Newest uploads, read on the server from the channel's YouTube feed by
+// public/api/podcast-episodes.php (refreshed hourly). Anything not in the list
+// above is added automatically; episodes already listed keep their hand-written
+// guest and summary. If the request fails, the list above is used as-is.
+export const LATEST_EPISODES_URL = "/api/podcast-episodes.php";
+const NEW_EPISODE_GUEST = "Chasing Excellence with Tony Thompson";
+
+export function mergeEpisodes(archive, latest) {
+  const known = new Set(archive.map((e) => e.id));
+  const added = latest
+    .filter((e) => e && e.id && e.title && !known.has(e.id))
+    .map((e) => ({
+      id: e.id,
+      episode: e.episode ?? null,
+      title: e.title,
+      guest: NEW_EPISODE_GUEST,
+      publishedAt: e.publishedAt,
+      duration: "",
+      desc: e.desc || "",
+    }));
+  if (!added.length) return archive;
+  return [...added, ...archive].sort((a, b) =>
+    b.publishedAt.localeCompare(a.publishedAt),
+  );
+}
+
+export async function fetchLatestEpisodes() {
+  const res = await fetch(LATEST_EPISODES_URL, { cache: "no-cache" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  return Array.isArray(data.episodes) ? data.episodes : [];
+}
