@@ -7,6 +7,7 @@ import { ContactSection } from "./components/layout/ContactSection";
 import { CookieBanner } from "./components/layout/CookieBanner";
 import { Navbar } from "./components/layout/Navbar";
 import { ScrollToTop } from "./components/layout/ScrollToTop";
+import { RouteSeo } from "./components/layout/RouteSeo";
 import { VideoPlayerProvider } from "./components/media/VideoPlayerProvider";
 import { QuizProvider } from "./context/QuizContext";
 import { usePerformanceTier } from "./hooks/usePerformanceTier";
@@ -80,6 +81,7 @@ function App() {
       <QuizProvider>
         <main className="bg-black text-white overflow-x-hidden relative flex flex-col min-h-screen">
           <ScrollToTop />
+          <RouteSeo />
           {!s && (
             <div className="fixed top-0 left-0 w-full z-[2147483646]">
               <Navbar menuOpen={e} setMenuOpen={t} heroVisible={o} />

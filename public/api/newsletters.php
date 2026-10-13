@@ -19,7 +19,7 @@ const NAME_PREFIX = 'Chasing Excellence Newsletter |';
 const LIST_CACHE_SECONDS = 3600;
 
 /** Turn a sent campaign email into a page that's safe to show publicly. */
-function nl_clean_html(string $html): string
+function nl_clean_html(string $html, ?array $meta = null): string
 {
     $html = preg_replace('#<script\b[^>]*>.*?</script>#is', '', $html);
     // Drop the unsubscribe link (it only works for the person the email was sent to).
@@ -30,6 +30,14 @@ function nl_clean_html(string $html): string
     $html = preg_replace('#\{\{[^{}]*\}\}#', '', $html);
     // Links open in a new tab instead of inside the reader.
     $base = '<base target="_blank">';
+    if ($meta) {
+        // Proper page title, description and canonical for search engines.
+        $esc = fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
+        $html = preg_replace('#<title\b[^>]*>.*?</title>#is', '', $html);
+        $base .= '<title>' . $esc($meta['title'] . ' | Chasing Excellence Newsletter') . '</title>'
+            . '<meta name="description" content="' . $esc($meta['excerpt']) . '">'
+            . '<link rel="canonical" href="https://meettonythompson.com' . $esc($meta['url']) . '">';
+    }
     if (preg_match('#<head\b[^>]*>#i', $html)) {
         $html = preg_replace('#<head\b[^>]*>#i', '$0' . $base, $html, 1);
     } else {
@@ -100,9 +108,10 @@ if (PHP_SAPI === 'cli') {
         $index = [];
         foreach (json_decode(file_get_contents($manifest), true) as [$id, $name, $subject, $date]) {
             $html = file_get_contents("$raw/$id.html");
-            file_put_contents("$out/$id.html", nl_clean_html($html));
-            $index[] = ['id' => $id, 'title' => nl_title($name, $subject), 'date' => $date,
+            $meta = ['id' => $id, 'title' => nl_title($name, $subject), 'date' => $date,
                 'excerpt' => nl_excerpt($html, $subject), 'url' => "/newsletters/$id.html"];
+            file_put_contents("$out/$id.html", nl_clean_html($html, $meta));
+            $index[] = $meta;
         }
         file_put_contents("$out/index.json", json_encode($index, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "\n");
         fwrite(STDERR, count($index) . " issues written to $out\n");
@@ -167,13 +176,11 @@ function nl_issue(string $id): ?array
     if ($raw === null) {
         return null;
     }
-    $issue = [
-        'html' => nl_clean_html($raw),
-        'meta' => ['id' => $id, 'title' => nl_title((string) $c['name'], (string) ($c['subject'] ?? '')),
-            'date' => substr((string) ($c['createdAt'] ?? ''), 0, 10),
-            'excerpt' => nl_excerpt($raw, (string) ($c['subject'] ?? '')),
-            'url' => '/api/newsletters.php?id=' . rawurlencode($id)],
-    ];
+    $meta = ['id' => $id, 'title' => nl_title((string) $c['name'], (string) ($c['subject'] ?? '')),
+        'date' => substr((string) ($c['createdAt'] ?? ''), 0, 10),
+        'excerpt' => nl_excerpt($raw, (string) ($c['subject'] ?? '')),
+        'url' => '/api/newsletters.php?id=' . rawurlencode($id)];
+    $issue = ['html' => nl_clean_html($raw, $meta), 'meta' => $meta];
     file_put_contents($file, json_encode($issue, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
     return $issue;
 }

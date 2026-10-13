@@ -1,0 +1,63 @@
+{
+  "siteUrl": "https://meettonythompson.com",
+  "image": "https://meettonythompson.com/assets/meetTony-cqvuGTsO.jpg",
+  "default": {
+    "title": "Tony Thompson | Mortgage Keynote Speaker & Sales Coach",
+    "description": "Tony Thompson helps mortgage and real estate professionals grow their impact, income and influence through keynotes, coaching and proven sales systems."
+  },
+  "pages": {
+    "/": {
+      "title": "Tony Thompson | Mortgage Keynote Speaker & Sales Coach",
+      "description": "Tony Thompson helps mortgage and real estate professionals grow their impact, income and influence through keynotes, coaching and proven sales systems."
+    },
+    "/about-tony": {
+      "title": "About Tony Thompson | NAMMBA Founder & Keynote Speaker",
+      "description": "Founder of NAMMBA and a Global 100 mortgage leader, Tony Thompson coaches top originators and leaders to build systems, influence and lasting legacies."
+    },
+    "/meet-tony": {
+      "title": "Meet Tony Thompson | Keynote Speaker & Business Coach",
+      "description": "Meet Tony Thompson: keynote speaker, business coach and founder of NAMMBA, helping mortgage professionals lead, influence and win."
+    },
+    "/book-tony": {
+      "title": "Book Tony Thompson | Mortgage & Leadership Keynote Speaker",
+      "description": "Book Tony Thompson for your conference, sales kickoff or leadership event. Share your event details and his team will follow up with availability."
+    },
+    "/courses": {
+      "title": "Courses & CCL Program | Tony Thompson",
+      "description": "High-performance sales frameworks for mortgage professionals, including the CCL Program for building realtor partnerships that close."
+    },
+    "/podcasts": {
+      "title": "Chasing Excellence Podcast | Tony Thompson",
+      "description": "Weekly conversations with top mortgage brokers, loan officers and leaders on how they built winning teams and businesses, hosted by Tony Thompson."
+    },
+    "/newsletter": {
+      "title": "Chasing Excellence Newsletter | Tony Thompson",
+      "description": "A weekly journal on sales, leadership and reputation for mortgage and real estate professionals. Read past issues and subscribe free."
+    },
+    "/shop": {
+      "title": "Shop | Tony Thompson",
+      "description": "Tony Thompson apparel and gear for people chasing excellence. Coming soon."
+    },
+    "/join-inner-circle": {
+      "title": "Join the Inner Circle | Free Growth Blueprint",
+      "description": "Join Tony Thompson's Inner Circle and download the free Mortgage Broker Business Growth Blueprint."
+    },
+    "/quiz-intro": {
+      "title": "Growth Roadmap Assessment | Tony Thompson",
+      "description": "Answer a few questions and get a custom growth roadmap for your mortgage or real estate business."
+    },
+    "/quiz": {
+      "title": "Growth Roadmap Assessment | Tony Thompson",
+      "description": "Answer a few questions and get a custom growth roadmap for your mortgage or real estate business.",
+      "canonical": "/quiz-intro"
+    },
+    "/privacy-policy": { "title": "Privacy Policy | Tony Thompson", "description": "How meettonythompson.com collects, uses and protects your information." },
+    "/terms": { "title": "Terms of Use | Tony Thompson", "description": "Terms of use for meettonythompson.com." },
+    "/cookie-policy": { "title": "Cookie Policy | Tony Thompson", "description": "How meettonythompson.com uses cookies." },
+    "/disclaimer": { "title": "Disclaimer | Tony Thompson", "description": "Disclaimer for meettonythompson.com." },
+    "/salesgrowthplatform": { "canonical": "/" },
+    "/booktony": { "canonical": "/" },
+    "/meettony": { "canonical": "/" }
+  },
+  "noindex": ["/thank-you", "/inner-circle-success", "/quiz/results", "/roadmap", "/stackbuilder", "/lets-win", "/go", "/sms-approval"]
+}
