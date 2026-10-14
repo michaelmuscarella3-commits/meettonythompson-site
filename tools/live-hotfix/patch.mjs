@@ -21,6 +21,7 @@ const once = (a, b) => {
   s = s.replace(a, () => b);
 };
 const J = JSON.stringify;
+const SGP_URL = "https://info.meettonythompson.com/sgp";
 
 // ---------- 1. Book Tony ----------
 once('message:n.message.value.trim(),form_page:"Book Tony Form"',
@@ -180,6 +181,10 @@ once("children:[X.jsx(BS,{}),", "children:[X.jsx(BS,{}),X.jsx(TTSeoRoute,{}),");
 const seoFns =
   "var TT_SEO=" + J(SEO) + ";" + APPLY_SEO +
   "function TTSeoRoute(){const l=Gd();B.useEffect(()=>{TTApplySeo(l.pathname,TT_SEO)},[l.pathname]);return null}";
+
+// ---------- 6. Growth Programs cards open the Sales Growth Platform page ----------
+for (const k of ["aspire", "ccl", "elevate"])
+  once(`onClick:()=>((e,t)=>KM(${J(k)},e,t))(e,t)`, `onClick:()=>{window.location.href=${J(SGP_URL)}}`);
 
 const ex = s.lastIndexOf("export{");
 if (ex < 0) throw new Error("export not found");

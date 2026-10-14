@@ -20,6 +20,9 @@ import { QuizContext } from "../../context/QuizContext";
 import { useVideoPlayer } from "../media/VideoPlayerProvider";
 import { WaitlistModal } from "./WaitlistModal";
 
+// Growth Programs card buttons go to the Sales Growth Platform page.
+const SGP_URL = "https://info.meettonythompson.com/sgp";
+
 const LaunchBadge = "/videos/programsVideo.mp4",
   polarToCartesian = (e, t, n) => {
     (n(!1), t(e), setTimeout(() => n(!0), 25));
@@ -31,7 +34,9 @@ const LaunchBadge = "/videos/programsVideo.mp4",
       price: "Launching Soon",
       button: "JOIN WAITLIST",
       icon: TrophyIcon,
-      onClick: () => ((e, t) => polarToCartesian("aspire", e, t))(e, t),
+      onClick: () => {
+        window.location.href = SGP_URL;
+      },
       features: [
         "Annual Strategic Growth Blueprint",
         "Proprietary Realtor Performance Data",
@@ -47,7 +52,9 @@ const LaunchBadge = "/videos/programsVideo.mp4",
       price: "Launching Soon",
       button: "JOIN WAITLIST",
       icon: ZapIcon,
-      onClick: () => ((e, t) => polarToCartesian("ccl", e, t))(e, t),
+      onClick: () => {
+        window.location.href = SGP_URL;
+      },
       features: [
         "All ASPIRE Phase Benefits",
         "Quarterly Strategic Blueprints",
@@ -63,7 +70,9 @@ const LaunchBadge = "/videos/programsVideo.mp4",
       price: "Limited Seats",
       button: "APPLY NOW",
       icon: CrownIcon,
-      onClick: () => ((e, t) => polarToCartesian("elevate", e, t))(e, t),
+      onClick: () => {
+        window.location.href = SGP_URL;
+      },
       features: [
         "All IGNITE Expansion Benefits",
         "1-on-1 Elite Strategic Coaching",
