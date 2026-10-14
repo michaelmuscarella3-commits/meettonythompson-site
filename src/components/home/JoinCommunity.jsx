@@ -31,8 +31,8 @@ const LaunchBadge = "/videos/programsVideo.mp4",
     {
       name: "ASPIRE",
       key: "aspire",
-      price: "Launching Soon",
-      button: "JOIN WAITLIST",
+      price: "Now Enrolling",
+      button: "ENROLL NOW",
       icon: TrophyIcon,
       onClick: () => {
         window.location.href = SGP_URL;
@@ -49,8 +49,8 @@ const LaunchBadge = "/videos/programsVideo.mp4",
     {
       name: "IGNITE",
       key: "ccl",
-      price: "Launching Soon",
-      button: "JOIN WAITLIST",
+      price: "Now Enrolling",
+      button: "ENROLL NOW",
       icon: ZapIcon,
       onClick: () => {
         window.location.href = SGP_URL;

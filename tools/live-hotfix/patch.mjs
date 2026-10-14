@@ -185,6 +185,8 @@ const seoFns =
 // ---------- 6. Growth Programs cards open the Sales Growth Platform page ----------
 for (const k of ["aspire", "ccl", "elevate"])
   once(`onClick:()=>((e,t)=>KM(${J(k)},e,t))(e,t)`, `onClick:()=>{window.location.href=${J(SGP_URL)}}`);
+// ASPIRE and IGNITE are enrolling now, no longer waitlist-only.
+all('price:"Launching Soon",button:"JOIN WAITLIST"', 'price:"Now Enrolling",button:"ENROLL NOW"', 2);
 
 const ex = s.lastIndexOf("export{");
 if (ex < 0) throw new Error("export not found");
