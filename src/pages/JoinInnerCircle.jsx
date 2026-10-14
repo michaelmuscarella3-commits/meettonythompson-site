@@ -65,6 +65,9 @@ export function JoinInnerCircle() {
               source: r.source.value.trim(),
               message: r.message.value.trim(),
               sms_consent: r.sms_consent.checked ? "Yes" : "No",
+              sms_marketing_consent: r.sms_marketing_consent.checked
+                ? "Yes"
+                : "No",
               form_page: "Inner Circle Application",
             };
             try {

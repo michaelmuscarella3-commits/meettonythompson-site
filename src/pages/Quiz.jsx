@@ -4,7 +4,10 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { QUESTIONS, RESULTS, StretchText } from "../components/quiz/quizData";
 import { GlassPanel } from "../components/quiz/QuizUI";
-import { SmsConsent } from "../components/forms/SmsConsent";
+import {
+  SmsConsent,
+  marketingConsentChecked,
+} from "../components/forms/SmsConsent";
 
 export function Quiz() {
   const e = useNavigate(),
@@ -84,6 +87,7 @@ export function Quiz() {
             last: a.name.split(" ").slice(1).join(" ") || "",
             phone: a.phone,
             sms_consent: smsConsent ? "Yes" : "No",
+            sms_marketing_consent: marketingConsentChecked() ? "Yes" : "No",
             tier: "quiz",
           }),
         }).catch(() => {}),

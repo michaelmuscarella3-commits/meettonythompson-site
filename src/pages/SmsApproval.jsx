@@ -1,4 +1,5 @@
 import { InfoIcon, MailIcon, PhoneIcon, ShieldCheckIcon } from "lucide-react";
+import SMS from "../data/smsConsent.json";
 import React from "react";
 import { sitePath } from "../utils/sitePath";
 
@@ -35,13 +36,22 @@ export function SmsApproval() {
             <h3 className="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-4">
               Official Consent Language
             </h3>
+            <p className="text-gray-700 text-sm leading-relaxed mb-4">
+              Every form that asks for a phone number shows two separate,
+              optional checkboxes. Neither is pre-checked, and submitting a form
+              never requires checking either one.
+            </p>
+            <p className="text-gray-500 text-[11px] font-bold uppercase tracking-widest mb-2">
+              Box 1 · Customer care (non-marketing)
+            </p>
+            <p className="text-gray-700 text-sm leading-relaxed italic mb-4">
+              "{SMS.care}"
+            </p>
+            <p className="text-gray-500 text-[11px] font-bold uppercase tracking-widest mb-2">
+              Box 2 · Marketing
+            </p>
             <p className="text-gray-700 text-sm leading-relaxed italic">
-              "By providing your phone number, you agree to receive recurring
-              automated promotional and personalized marketing text messages
-              (e.g. coaching tips, event reminders, program updates) from Tony
-              Thompson at the cell number used when signing up. Consent is not a
-              condition of any purchase. Reply HELP for help and STOP to cancel.
-              Msg frequency varies. Msg & data rates may apply."
+              "{SMS.marketing}"
             </p>
           </div>
           <div className="bg-purple-50 rounded-2xl p-6 w-full flex items-start gap-4 text-left mb-8">

@@ -43,6 +43,9 @@ export function BookTony() {
               source: n.source.value.trim(),
               message: n.message.value.trim(),
               sms_consent: n.sms_consent.checked ? "Yes" : "No",
+              sms_marketing_consent: n.sms_marketing_consent.checked
+                ? "Yes"
+                : "No",
               form_page: "Book Tony Form",
             };
             try {

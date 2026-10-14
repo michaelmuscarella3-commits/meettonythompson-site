@@ -20,7 +20,10 @@ import {
   formatIssueDate,
   mergeIssues,
 } from "../data/newsletterIssues";
-import { SmsConsent } from "../components/forms/SmsConsent";
+import {
+  SmsConsent,
+  marketingConsentChecked,
+} from "../components/forms/SmsConsent";
 
 const ACCENT = "#9b26b6",
   ACCENT_LIGHT = "#d069f0",
@@ -480,6 +483,9 @@ export function Newsletter() {
                           company: e.company,
                           phone: e.phone,
                           sms_consent: e.smsConsent ? "Yes" : "No",
+                          sms_marketing_consent: marketingConsentChecked()
+                            ? "Yes"
+                            : "No",
                           city: e.city,
                           state: e.state,
                         }),

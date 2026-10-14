@@ -26,38 +26,59 @@ const ELEVATE_URL = "https://info.meettonythompson.com/elevate";
 
 // ---------- 1. Book Tony ----------
 once('message:n.message.value.trim(),form_page:"Book Tony Form"',
-  'message:n.message.value.trim(),sms_consent:n.sms_consent.checked?"Yes":"No",form_page:"Book Tony Form"');
+  'message:n.message.value.trim(),sms_consent:n.sms_consent.checked?"Yes":"No",sms_marketing_consent:TTMk(),form_page:"Book Tony Form"');
 once('window.location.href="/tony-thompson-spmn-vital/thank-you"', 'window.location.href="/thank-you"');
 // Shared consent checkbox, added once as a top-level function (hoisted).
 const link = (href, text) =>
   `X.jsx("a",{href:${J(href)},target:"_blank",rel:"noopener noreferrer",className:"underline hover:text-white",style:{color:"#e8b4fe"},children:${J(text)}})`;
+const SMS = JSON.parse(fs.readFileSync(new URL("../../src/data/smsConsent.json", import.meta.url), "utf8"));
+const box = (name, text) =>
+  `X.jsxs("label",{className:"flex items-start gap-4 cursor-pointer text-left",children:[` +
+  `X.jsx("input",{type:"checkbox",name:${J(name)},value:"yes",className:"mt-1 shrink-0 cursor-pointer",style:{width:20,height:20,accentColor:"#9b26b6"}}),` +
+  `X.jsx("span",{className:"text-sm leading-relaxed text-white/70",style:{textTransform:"none",letterSpacing:"normal",fontWeight:400},children:${J(text)}})]})`;
+// Two separate boxes: carriers reject campaigns that bundle marketing consent
+// with customer-care consent.
 const helper =
-  `function TTSmsConsent({className:c=""}){return X.jsxs("label",{className:"flex items-start gap-4 cursor-pointer text-left "+c,children:[` +
-  `X.jsx("input",{type:"checkbox",name:"sms_consent",value:"yes",className:"mt-1 shrink-0 cursor-pointer",style:{width:20,height:20,accentColor:"#9b26b6"}}),` +
-  `X.jsxs("span",{className:"text-sm leading-relaxed text-white/70",style:{textTransform:"none",letterSpacing:"normal",fontWeight:400},children:[` +
-  J("By checking this box, I agree to receive SMS text messages from Meet Tony Thompson, including appointment reminders, customer support updates, and promotional offers. Message frequency varies. Msg & data rates may apply. Reply STOP to unsubscribe or HELP for assistance. View our ") +
-  `,${link("/privacy-policy", "Privacy Policy")}," and ",${link("/terms", "Terms")},"."]})]})}`;
+  `function TTSmsConsent({className:c=""}){return X.jsxs("div",{className:"text-left "+c,style:{display:"flex",flexDirection:"column",gap:16},children:[` +
+  box("sms_consent", SMS.care) + "," + box("sms_marketing_consent", SMS.marketing) + "," +
+  `X.jsxs("p",{className:"text-xs leading-relaxed text-white/50",style:{textTransform:"none",letterSpacing:"normal",fontWeight:400},children:[` +
+  J(SMS.footer + " ") + `,${link("/privacy-policy", "Privacy Policy")}," and ",${link("/terms", "Terms")},"."]})]})}` +
+  `function TTMk(){return document.querySelector('input[name="sms_marketing_consent"]:checked')?"Yes":"No"}`;
 const consent = (cls = "") => `X.jsx(TTSmsConsent,{className:${J(cls)}}),`;
 once('X.jsx("button",{type:"submit",disabled:e,className:"px-12 py-4 rounded-xl',
   consent() + 'X.jsx("button",{type:"submit",disabled:e,className:"px-12 py-4 rounded-xl');
 
 // Join the Inner Circle
 once('message:r.message.value.trim(),form_page:"Inner Circle Application"',
-  'message:r.message.value.trim(),sms_consent:r.sms_consent&&r.sms_consent.checked?"Yes":"No",form_page:"Inner Circle Application"');
+  'message:r.message.value.trim(),sms_consent:r.sms_consent&&r.sms_consent.checked?"Yes":"No",sms_marketing_consent:TTMk(),form_page:"Inner Circle Application"');
 once('X.jsxs("div",{className:"pt-4",children:[X.jsx("button",{type:"submit",disabled:t,className:"w-full py-5',
   consent() + 'X.jsxs("div",{className:"pt-4",children:[X.jsx("button",{type:"submit",disabled:t,className:"w-full py-5');
 
 // Quiz contact step (state-driven form; read the checkbox from the page)
 once('phone:a.phone,tier:"quiz"',
-  'phone:a.phone,sms_consent:(document.querySelector(\'input[name="sms_consent"]\')||{}).checked?"Yes":"No",tier:"quiz"');
+  'phone:a.phone,sms_consent:(document.querySelector(\'input[name="sms_consent"]\')||{}).checked?"Yes":"No",sms_marketing_consent:TTMk(),tier:"quiz"');
 once('X.jsx("div",{className:"pt-8",children:X.jsx(mI,{className:"w-full",children:X.jsx("button",{type:"submit",disabled:u',
   consent("pt-2") + 'X.jsx("div",{className:"pt-8",children:X.jsx(mI,{className:"w-full",children:X.jsx("button",{type:"submit",disabled:u');
 
 // Newsletter
 once('phone:e.phone,city:e.city',
-  'phone:e.phone,sms_consent:n.target.sms_consent&&n.target.sms_consent.checked?"Yes":"No",city:e.city');
+  'phone:e.phone,sms_consent:n.target.sms_consent&&n.target.sms_consent.checked?"Yes":"No",sms_marketing_consent:TTMk(),city:e.city');
 once('X.jsxs("div",{className:"md:col-span-2 space-y-6 mt-2"',
   consent("md:col-span-2") + 'X.jsxs("div",{className:"md:col-span-2 space-y-6 mt-2"');
+
+// SMS approval page: show both opt-in boxes exactly as they appear on the forms.
+{
+  const a = s.indexOf('X.jsx("p",{className:"text-gray-700 text-sm leading-relaxed italic",children:\'"By providing');
+  const b = s.indexOf('Msg & data rates may apply."\'})', a);
+  if (a < 0 || b < 0) throw new Error("sms approval consent text not found");
+  const label = (x) => `X.jsx("p",{className:"text-gray-500 text-[11px] font-bold uppercase tracking-widest mb-2",children:${J(x)}})`;
+  const quote = (x, cls) => `X.jsx("p",{className:${J("text-gray-700 text-sm leading-relaxed italic " + cls)},children:${J('"' + x + '"')}})`;
+  s = s.slice(0, a) +
+    `X.jsxs("div",{children:[X.jsx("p",{className:"text-gray-700 text-sm leading-relaxed mb-4",children:"Every form that asks for a phone number shows two separate, optional checkboxes. Neither is pre-checked, and submitting a form never requires checking either one."}),` +
+    label("Box 1 \u00b7 Customer care (non-marketing)") + "," + quote(SMS.care, "mb-4") + "," +
+    label("Box 2 \u00b7 Marketing") + "," + quote(SMS.marketing, "") + "]})" +
+    s.slice(b + 'Msg & data rates may apply."\'})'.length);
+}
 
 // ---------- 2. Podcasts ----------
 const label = (e) => e.episode ? `EP.${e.episode}`

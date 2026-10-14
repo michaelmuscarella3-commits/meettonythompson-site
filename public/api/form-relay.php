@@ -95,7 +95,10 @@ $email = $pick(['email']);
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     reply(422, ['success' => false, 'error' => 'A valid email is required']);
 }
+// Two separate opt-ins (carriers require marketing consent on its own box).
+// Keep this wording in sync with src/data/smsConsent.json.
 $consent = strtolower($pick(['sms_consent'])) === 'yes' ? 'Yes' : 'No';
+$marketing = strtolower($pick(['sms_marketing_consent'])) === 'yes' ? 'Yes' : 'No';
 
 $out = [
     'form_name' => $form,
@@ -107,17 +110,21 @@ $out = [
     'company_name' => $pick(['company']),
     'message' => $pick(['message', 'enquiry']),
     'sms_consent' => $consent,
+    'sms_marketing_consent' => $marketing,
     'submitted_at' => gmdate('c'),
     'page_url' => (string) ($_SERVER['HTTP_REFERER'] ?? ''),
     'ip_address' => (string) ($_SERVER['REMOTE_ADDR'] ?? ''),
     'user_agent' => mb_substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 300),
 ];
 if ($consent === 'Yes') {
-    $out['sms_consent_text'] = 'By checking this box, I agree to receive SMS text messages from Meet Tony Thompson, including appointment reminders, customer support updates, and promotional offers. Message frequency varies. Msg & data rates may apply. Reply STOP to unsubscribe or HELP for assistance.';
+    $out['sms_consent_text'] = 'I agree to receive non-marketing text messages from Tony Thompson about my inquiry, such as booking confirmations, appointment reminders and customer support replies. Message frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.';
+}
+if ($marketing === 'Yes') {
+    $out['sms_marketing_consent_text'] = 'I agree to receive marketing text messages from Tony Thompson, such as program announcements, event invitations and special offers. Message frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.';
 }
 // Everything else the form sent (event date, budget, job title, plan, ...).
 $skip = ['first_name', 'firstName', 'first', 'last_name', 'lastName', 'last', 'full_name', 'name',
-    'email', 'phone', 'company', 'message', 'enquiry', 'sms_consent', 'form_page', 'bot_field'];
+    'email', 'phone', 'company', 'message', 'enquiry', 'sms_consent', 'sms_marketing_consent', 'form_page', 'bot_field'];
 foreach ($in as $k => $v) {
     if (in_array($k, $skip, true) || !is_scalar($v) || !preg_match('/^[A-Za-z0-9_]{1,40}$/', (string) $k)) {
         continue;
