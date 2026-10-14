@@ -22,6 +22,7 @@ const once = (a, b) => {
 };
 const J = JSON.stringify;
 const SGP_URL = "https://info.meettonythompson.com/sgp";
+const ELEVATE_URL = "https://info.meettonythompson.com/elevate";
 
 // ---------- 1. Book Tony ----------
 once('message:n.message.value.trim(),form_page:"Book Tony Form"',
@@ -182,9 +183,10 @@ const seoFns =
   "var TT_SEO=" + J(SEO) + ";" + APPLY_SEO +
   "function TTSeoRoute(){const l=Gd();B.useEffect(()=>{TTApplySeo(l.pathname,TT_SEO)},[l.pathname]);return null}";
 
-// ---------- 6. Growth Programs cards open the Sales Growth Platform page ----------
-for (const k of ["aspire", "ccl", "elevate"])
-  once(`onClick:()=>((e,t)=>KM(${J(k)},e,t))(e,t)`, `onClick:()=>{window.location.href=${J(SGP_URL)}}`);
+// ---------- 6. Growth Programs cards open their enrollment pages ----------
+const PROGRAM_URLS = { aspire: SGP_URL, ccl: SGP_URL, elevate: ELEVATE_URL };
+for (const [k, url] of Object.entries(PROGRAM_URLS))
+  once(`onClick:()=>((e,t)=>KM(${J(k)},e,t))(e,t)`, `onClick:()=>{window.location.href=${J(url)}}`);
 // ASPIRE and IGNITE are enrolling now, no longer waitlist-only.
 all('price:"Launching Soon",button:"JOIN WAITLIST"', 'price:"Now Enrolling",button:"ENROLL NOW"', 2);
 

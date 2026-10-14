@@ -20,8 +20,9 @@ import { QuizContext } from "../../context/QuizContext";
 import { useVideoPlayer } from "../media/VideoPlayerProvider";
 import { WaitlistModal } from "./WaitlistModal";
 
-// Growth Programs card buttons go to the Sales Growth Platform page.
+// Growth Programs card buttons go to their enrollment pages.
 const SGP_URL = "https://info.meettonythompson.com/sgp";
+const ELEVATE_URL = "https://info.meettonythompson.com/elevate";
 
 const LaunchBadge = "/videos/programsVideo.mp4",
   polarToCartesian = (e, t, n) => {
@@ -71,7 +72,7 @@ const LaunchBadge = "/videos/programsVideo.mp4",
       button: "APPLY NOW",
       icon: CrownIcon,
       onClick: () => {
-        window.location.href = SGP_URL;
+        window.location.href = ELEVATE_URL;
       },
       features: [
         "All IGNITE Expansion Benefits",
