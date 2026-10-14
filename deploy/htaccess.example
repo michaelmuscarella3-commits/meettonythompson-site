@@ -10,3 +10,12 @@
   # Everything else goes to the React app.
   RewriteRule ^ index.html [L]
 </IfModule>
+
+# The live site's main script keeps the same name (index-CaJh229O.js) after
+# every update, so tell browsers to check for a newer copy on each visit
+# (unchanged files come back as a tiny "not modified" reply).
+<IfModule mod_headers.c>
+  <FilesMatch "^(index\.html|index-CaJh229O\.js(\.gz)?)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
