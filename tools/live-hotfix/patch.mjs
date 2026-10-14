@@ -80,6 +80,9 @@ once('X.jsxs("div",{className:"md:col-span-2 space-y-6 mt-2"',
     s.slice(b + 'Msg & data rates may apply."\'})'.length);
 }
 
+// SMS approval page contact email (was a non-existent tonythompson.com address).
+all("info@tonythompson.com", "info@meettonythompson.com", 2);
+
 // ---------- 2. Podcasts ----------
 const label = (e) => e.episode ? `EP.${e.episode}`
   : new Date(`${e.publishedAt}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" }).toUpperCase();

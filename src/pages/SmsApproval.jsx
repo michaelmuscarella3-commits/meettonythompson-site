@@ -108,10 +108,10 @@ export function SmsApproval() {
             <div className="flex items-center gap-2">
               <MailIcon size={15} />
               <a
-                href="mailto:info@tonythompson.com"
+                href="mailto:info@meettonythompson.com"
                 className="hover:text-purple-600 transition-colors"
               >
-                info@tonythompson.com
+                info@meettonythompson.com
               </a>
             </div>
             <div className="flex items-center gap-2">
