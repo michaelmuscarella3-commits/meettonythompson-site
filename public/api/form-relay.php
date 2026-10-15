@@ -46,6 +46,43 @@ if (!is_array($in)) {
     reply(400, ['success' => false, 'error' => 'Bad request']);
 }
 
+// Hidden "bot_field" is invisible to people; bots that fill it get a fake success.
+if (trim((string) ($in['bot_field'] ?? '')) !== '') {
+    reply(200, ['success' => true]);
+}
+
+// At most 5 submissions per visitor (IP) every 10 minutes.
+$rateDir = dirname(__DIR__, 2);
+if (!is_writable($rateDir)) {
+    $rateDir = sys_get_temp_dir();
+}
+$rateFile = getenv('FORM_RELAY_RATE_FILE') ?: $rateDir . '/tt-form-rate.json';
+$fh = @fopen($rateFile, 'c+');
+if ($fh && flock($fh, LOCK_EX)) {
+    $now = time();
+    $hits = json_decode((string) stream_get_contents($fh), true);
+    $hits = is_array($hits) ? $hits : [];
+    foreach ($hits as $k => $times) {
+        $hits[$k] = array_values(array_filter((array) $times, fn($t) => $t > $now - 600));
+        if (!$hits[$k]) {
+            unset($hits[$k]);
+        }
+    }
+    $ipKey = sha1((string) ($_SERVER['REMOTE_ADDR'] ?? ''));
+    $limited = count($hits[$ipKey] ?? []) >= 5;
+    if (!$limited) {
+        $hits[$ipKey][] = $now;
+    }
+    ftruncate($fh, 0);
+    rewind($fh);
+    fwrite($fh, json_encode($hits));
+    flock($fh, LOCK_UN);
+    fclose($fh);
+    if ($limited) {
+        reply(429, ['success' => false, 'error' => 'Too many submissions. Please try again in a few minutes.']);
+    }
+}
+
 // ---- Settings ---------------------------------------------------------------
 $configFile = getenv('FORM_RELAY_CONFIG') ?: dirname(__DIR__, 2) . '/form-relay.config.php';
 if (!is_readable($configFile)) {
@@ -122,9 +159,32 @@ if ($consent === 'Yes') {
 if ($marketing === 'Yes') {
     $out['sms_marketing_consent_text'] = 'I agree to receive marketing text messages from Tony Thompson, such as program announcements, event invitations and special offers. Message frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.';
 }
+// Flag (never block) submissions that look like keyboard-mashing or link spam,
+// so the GHL workflow can skip the team notification for them.
+$noVowels = fn(string $w) => mb_strlen($w) >= 3 && !preg_match('/[aeiouy]/i', $w);
+$reasons = [];
+foreach ([$first, $last] as $part) {
+    if (preg_match('/^[A-Za-z]+$/', $part) && $noVowels($part)) {
+        $reasons[] = 'name looks random';
+        break;
+    }
+}
+$words = preg_split('/\s+/', trim($out['message']), -1, PREG_SPLIT_NO_EMPTY);
+if (count($words) >= 3 && count(array_filter($words, $noVowels)) * 2 >= count($words)) {
+    $reasons[] = 'message looks random';
+}
+if (preg_match_all('#https?://#i', $out['message']) >= 2) {
+    $reasons[] = 'message has several links';
+}
+$out['likely_spam'] = $reasons ? 'Yes' : 'No';
+if ($reasons) {
+    $out['spam_reason'] = implode('; ', $reasons);
+}
+
 // Everything else the form sent (event date, budget, job title, plan, ...).
 $skip = ['first_name', 'firstName', 'first', 'last_name', 'lastName', 'last', 'full_name', 'name',
-    'email', 'phone', 'company', 'message', 'enquiry', 'sms_consent', 'sms_marketing_consent', 'form_page', 'bot_field'];
+    'email', 'phone', 'company', 'message', 'enquiry', 'sms_consent', 'sms_marketing_consent', 'form_page', 'bot_field',
+    'likely_spam', 'spam_reason'];
 foreach ($in as $k => $v) {
     if (in_array($k, $skip, true) || !is_scalar($v) || !preg_match('/^[A-Za-z0-9_]{1,40}$/', (string) $k)) {
         continue;
@@ -161,7 +221,7 @@ if (!$delivered) {
     $domain = preg_replace('/:\d+$/', '', $host) ?: 'meettonythompson.com';
     $safeEmail = str_replace(["\r", "\n"], '', $email);
     $headers = "From: Website Forms <noreply@{$domain}>\r\nReply-To: {$safeEmail}\r\nContent-Type: text/plain; charset=UTF-8";
-    $subject = "New {$form} submission (GHL delivery failed)";
+    $subject = ($reasons ? '[Likely spam] ' : '') . "New {$form} submission (GHL delivery failed)";
     $mailer = getenv('FORM_RELAY_TEST_MAILBOX');
     if ($mailer) {
         $delivered = (bool) file_put_contents($mailer, "To: $fallbackEmail\nSubject: $subject\n$headers\n\n" . implode("\n", $lines) . "\n\n", FILE_APPEND);
