@@ -172,7 +172,7 @@ function nl_list_paths(): array
     $loc = rawurlencode($location);
     return [
         'campaigns' => "/emails/locations/$loc/campaigns/emails?limit=20&status=sent&search=" . rawurlencode('Chasing Excellence Newsletter'),
-        'schedule' => "/emails/schedule?locationId=$loc&limit=50",
+        'schedule' => "/emails/schedule?locationId=$loc&limit=20",
     ];
 }
 
@@ -211,24 +211,43 @@ function nl_norm(array $c): array
 function nl_campaigns(): ?array
 {
     foreach (nl_list_paths() as $path) {
-        [$code, $data] = nl_call($path);
-        if ($code < 200 || $code >= 300 || !$data) {
-            continue;
-        }
-        $rows = $data['campaigns'] ?? $data['schedules'] ?? $data['data'] ?? null;
-        if (!is_array($rows)) {
-            continue;
-        }
+        // Read every page: the account has more campaigns than one page holds,
+        // and the newest may be on the last page.
         $out = [];
-        foreach ($rows as $row) {
-            $c = is_array($row) ? nl_norm($row) : null;
-            if ($c && $c['id'] !== '' && str_starts_with($c['name'], NAME_PREFIX)
-                && in_array($c['status'], ['sent', 'complete', 'completed', 'finished', 'delivered'], true)) {
-                $out[] = $c;
+        $seen = [];
+        $ok = false;
+        for ($page = 0; $page < 50; $page++) {
+            [$code, $data] = nl_call($path . '&offset=' . ($page * 20));
+            if ($code < 200 || $code >= 300 || !$data) {
+                break;
+            }
+            $rows = $data['campaigns'] ?? $data['schedules'] ?? $data['data'] ?? null;
+            if (!is_array($rows)) {
+                break;
+            }
+            $ok = true;
+            $new = 0;
+            foreach ($rows as $row) {
+                $c = is_array($row) ? nl_norm($row) : null;
+                if (!$c || $c['id'] === '' || isset($seen[$c['id']])) {
+                    continue;
+                }
+                $seen[$c['id']] = true;
+                $new++;
+                if (str_starts_with($c['name'], NAME_PREFIX)
+                    && in_array($c['status'], ['sent', 'complete', 'completed', 'finished', 'delivered'], true)) {
+                    $out[] = $c;
+                }
+            }
+            // Stop at the last page (or if the API ignores offset and repeats itself).
+            if ($new === 0 || count($rows) < 20) {
+                break;
             }
         }
-        usort($out, fn($a, $b) => strcmp($b['date'], $a['date']));
-        return $out;
+        if ($ok) {
+            usort($out, fn($a, $b) => strcmp($b['date'], $a['date']));
+            return $out;
+        }
     }
     return null;
 }
@@ -292,7 +311,9 @@ if (isset($_GET['status'])) {
     }
     $list = nl_campaigns();
     echo json_encode(['token' => 'set', 'ghl' => $list === null ? 'no working address' : 'ok',
-        'issues_found' => $list === null ? 0 : count($list), 'checks' => $checks]);
+        'issues_found' => $list === null ? 0 : count($list),
+        'newest_issue' => $list ? $list[0]['date'] . ' ' . trim(substr($list[0]['name'], strlen(NAME_PREFIX))) : '',
+        'checks' => $checks], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
