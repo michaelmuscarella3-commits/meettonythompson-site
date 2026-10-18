@@ -16,6 +16,8 @@
  */
 
 const NAME_PREFIX = 'Chasing Excellence Newsletter |';
+// Campaigns named like the newsletter that are not newsletter issues (e.g. the Jul 11 OPSCON promo).
+const EXCLUDE_IDS = ['6a52371c28153f09c0b7e15b'];
 const LIST_CACHE_SECONDS = 3600;
 
 /** Turn a sent campaign email into a page that's safe to show publicly. */
@@ -234,7 +236,7 @@ function nl_campaigns(): ?array
                 }
                 $seen[$c['id']] = true;
                 $new++;
-                if (str_starts_with($c['name'], NAME_PREFIX)
+                if (!in_array($c['id'], EXCLUDE_IDS, true) && str_starts_with($c['name'], NAME_PREFIX)
                     && in_array($c['status'], ['sent', 'complete', 'completed', 'finished', 'delivered'], true)) {
                     $out[] = $c;
                 }
@@ -324,7 +326,7 @@ if (isset($_GET['id'])) {
         header('Location: /newsletters/' . $id . '.html', true, 302);
         exit;
     }
-    $issue = $id !== '' ? nl_issue($id) : null;
+    $issue = $id !== '' && !in_array($id, EXCLUDE_IDS, true) ? nl_issue($id) : null;
     if (!$issue) {
         http_response_code(404);
         header('Content-Type: text/plain; charset=utf-8');
