@@ -87,14 +87,14 @@ function nl_excerpt(string $html, string $fallback = ''): string
     return $out;
 }
 
-/** "Chasing Excellence Newsletter | Trust" -> "Trust"; ALL-CAPS names fall back to the subject. */
+/** Website title = the email's subject line, minus a leading "Chasing Excellence:" label. */
 function nl_title(string $name, string $subject): string
 {
-    $title = trim(str_starts_with($name, NAME_PREFIX) ? substr($name, strlen(NAME_PREFIX)) : $name);
-    if ($title === '' || ($title === mb_strtoupper($title) && preg_match('/\p{L}/u', $title))) {
-        $title = trim(preg_replace('/^Chasing Excellence( Newsletter)?:\s*/iu', '', $subject));
+    $title = trim(preg_replace('/^Chasing Excellence( Newsletter)?\s*:\s*/iu', '', $subject));
+    if ($title === '') {
+        $title = trim(str_starts_with($name, NAME_PREFIX) ? substr($name, strlen(NAME_PREFIX)) : $name);
     }
-    return rtrim($title, '.');
+    return $title;
 }
 
 // ---------------------------------------------------------------------------
