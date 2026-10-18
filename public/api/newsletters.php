@@ -148,16 +148,93 @@ function nl_get(string $url, array $headers = []): ?string
     return ($body !== false && $code >= 200 && $code < 300) ? (string) $body : null;
 }
 
-function nl_api(string $path): ?array
+/** GET a GHL API path; returns [http code, decoded JSON or null]. */
+function nl_call(string $path): array
 {
     global $apiBase, $token;
-    $body = nl_get($apiBase . $path, ['Authorization: Bearer ' . $token, 'Version: 2021-07-28', 'Accept: application/json']);
-    $data = $body === null ? null : json_decode($body, true);
-    return is_array($data) ? $data : null;
+    $ch = curl_init($apiBase . $path);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10,
+        CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $token, 'Version: 2021-07-28', 'Accept: application/json']]);
+    $body = curl_exec($ch);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    $data = is_string($body) ? json_decode($body, true) : null;
+    return [$code, is_array($data) ? $data : null];
+}
+
+/**
+ * GHL serves sent email campaigns at different addresses depending on the
+ * account, so try each known one. Returns [path => http code] when $probe.
+ */
+function nl_list_paths(): array
+{
+    global $location;
+    $loc = rawurlencode($location);
+    return [
+        'campaigns' => "/emails/locations/$loc/campaigns/emails?limit=20&status=sent&search=" . rawurlencode('Chasing Excellence Newsletter'),
+        'schedule' => "/emails/schedule?locationId=$loc&limit=50",
+    ];
+}
+
+/** First http(s) URL to the email's HTML found anywhere in a campaign record. */
+function nl_content_url(array $c): string
+{
+    foreach (['editorContentUrl', 'templateDataDownloadUrl', 'downloadUrl', 'htmlUrl', 'templateUrl'] as $k) {
+        if (!empty($c[$k]) && is_string($c[$k]) && str_starts_with($c[$k], 'http')) {
+            return $c[$k];
+        }
+    }
+    $found = '';
+    array_walk_recursive($c, function ($v) use (&$found) {
+        if ($found === '' && is_string($v) && preg_match('#^https://firebasestorage\.googleapis\.com/.+\.html#', $v)) {
+            $found = $v;
+        }
+    });
+    return $found;
+}
+
+/** Normalise a campaign record from either API shape. */
+function nl_norm(array $c): array
+{
+    $c = $c['campaign'] ?? $c;
+    return [
+        'id' => preg_replace('/[^A-Za-z0-9]/', '', (string) ($c['id'] ?? $c['_id'] ?? '')),
+        'name' => (string) ($c['name'] ?? $c['campaignName'] ?? ''),
+        'subject' => (string) ($c['subject'] ?? ''),
+        'status' => strtolower((string) ($c['status'] ?? 'sent')),
+        'date' => substr((string) ($c['createdAt'] ?? $c['dateAdded'] ?? ''), 0, 10),
+        'url' => nl_content_url($c),
+    ];
+}
+
+/** Sent "Chasing Excellence Newsletter | ..." campaigns, newest first. */
+function nl_campaigns(): ?array
+{
+    foreach (nl_list_paths() as $path) {
+        [$code, $data] = nl_call($path);
+        if ($code < 200 || $code >= 300 || !$data) {
+            continue;
+        }
+        $rows = $data['campaigns'] ?? $data['schedules'] ?? $data['data'] ?? null;
+        if (!is_array($rows)) {
+            continue;
+        }
+        $out = [];
+        foreach ($rows as $row) {
+            $c = is_array($row) ? nl_norm($row) : null;
+            if ($c && $c['id'] !== '' && str_starts_with($c['name'], NAME_PREFIX)
+                && in_array($c['status'], ['sent', 'complete', 'completed', 'finished', 'delivered'], true)) {
+                $out[] = $c;
+            }
+        }
+        usort($out, fn($a, $b) => strcmp($b['date'], $a['date']));
+        return $out;
+    }
+    return null;
 }
 
 /** Fetch, clean and cache one issue; returns [html, meta] or null. */
-function nl_issue(string $id): ?array
+function nl_issue(string $id, ?array $c = null): ?array
 {
     global $cacheDir, $location, $token;
     $file = "$cacheDir/$id.json";
@@ -167,18 +244,26 @@ function nl_issue(string $id): ?array
     if ($token === '') {
         return null;
     }
-    $c = nl_api('/emails/locations/' . rawurlencode($location) . '/campaigns/emails/' . rawurlencode($id));
-    $c = $c['campaign'] ?? $c;
-    if (!is_array($c) || !str_starts_with((string) ($c['name'] ?? ''), NAME_PREFIX) || empty($c['editorContentUrl'])) {
+    if (!$c || $c['url'] === '') {
+        $loc = rawurlencode($location);
+        foreach (["/emails/locations/$loc/campaigns/emails/" . rawurlencode($id), '/emails/schedule/' . rawurlencode($id) . "?locationId=$loc"] as $path) {
+            [$code, $data] = nl_call($path);
+            if ($code >= 200 && $code < 300 && $data) {
+                $c = nl_norm($data['schedule'] ?? $data);
+                break;
+            }
+        }
+    }
+    if (!$c || !str_starts_with($c['name'], NAME_PREFIX) || $c['url'] === '') {
         return null;
     }
-    $raw = nl_get((string) $c['editorContentUrl']);
+    $raw = nl_get($c['url']);
     if ($raw === null) {
         return null;
     }
-    $meta = ['id' => $id, 'title' => nl_title((string) $c['name'], (string) ($c['subject'] ?? '')),
-        'date' => substr((string) ($c['createdAt'] ?? ''), 0, 10),
-        'excerpt' => nl_excerpt($raw, (string) ($c['subject'] ?? '')),
+    $meta = ['id' => $id, 'title' => nl_title($c['name'], $c['subject']),
+        'date' => $c['date'],
+        'excerpt' => nl_excerpt($raw, $c['subject']),
         'url' => '/api/newsletters.php?id=' . rawurlencode($id)];
     $issue = ['html' => nl_clean_html($raw, $meta), 'meta' => $meta];
     file_put_contents($file, json_encode($issue, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
@@ -193,20 +278,21 @@ if (isset($_GET['status'])) {
         echo json_encode(['token' => 'missing', 'ghl' => 'not checked']);
         exit;
     }
-    $ch = curl_init($apiBase . '/emails/locations/' . rawurlencode($location) . '/campaigns/emails?limit=1');
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10,
-        CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $token, 'Version: 2021-07-28', 'Accept: application/json']]);
-    curl_exec($ch);
-    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    $ghl = match (true) {
+    $describe = fn(int $code) => match (true) {
         $code >= 200 && $code < 300 => 'ok',
         $code === 401 => 'token rejected (expired, rotated or mistyped)',
-        $code === 403 => 'token lacks the View Email Campaigns permission or this sub-account',
+        $code === 403 => 'token lacks permission for this',
+        $code === 404 => 'not available',
         $code === 0 => 'GoHighLevel unreachable from the server',
         default => 'error ' . $code,
     };
-    echo json_encode(['token' => 'set', 'ghl' => $ghl]);
+    $checks = [];
+    foreach (nl_list_paths() as $name => $path) {
+        $checks[$name] = $describe(nl_call($path)[0]);
+    }
+    $list = nl_campaigns();
+    echo json_encode(['token' => 'set', 'ghl' => $list === null ? 'no working address' : 'ok',
+        'issues_found' => $list === null ? 0 : count($list), 'checks' => $checks]);
     exit;
 }
 
@@ -241,16 +327,14 @@ if (is_array($list) && time() - (int) ($list['fetched'] ?? 0) < LIST_CACHE_SECON
 }
 $issues = is_array($list) ? ($list['issues'] ?? []) : [];
 if ($token !== '') {
-    $data = nl_api('/emails/locations/' . rawurlencode($location) . '/campaigns/emails?limit=20&status=sent&search=' . rawurlencode('Chasing Excellence Newsletter'));
-    if (is_array($data) && isset($data['campaigns']) && is_array($data['campaigns'])) {
+    $campaigns = nl_campaigns();
+    if ($campaigns !== null) {
         $issues = [];
-        foreach ($data['campaigns'] as $c) {
-            $id = preg_replace('/[^A-Za-z0-9]/', '', (string) ($c['id'] ?? ''));
-            if ($id === '' || ($c['status'] ?? '') !== 'sent' || !str_starts_with((string) ($c['name'] ?? ''), NAME_PREFIX)
-                || is_readable("$archiveDir/$id.html")) {
+        foreach ($campaigns as $c) {
+            if (is_readable("$archiveDir/{$c['id']}.html")) {
                 continue;
             }
-            $issue = nl_issue($id);
+            $issue = nl_issue($c['id'], $c);
             if ($issue) {
                 $issues[] = $issue['meta'];
             }
