@@ -185,6 +185,31 @@ function nl_issue(string $id): ?array
     return $issue;
 }
 
+// Health check: /api/newsletters.php?status  (never shows the token itself)
+if (isset($_GET['status'])) {
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+    if ($token === '') {
+        echo json_encode(['token' => 'missing', 'ghl' => 'not checked']);
+        exit;
+    }
+    $ch = curl_init($apiBase . '/emails/locations/' . rawurlencode($location) . '/campaigns/emails?limit=1');
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10,
+        CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $token, 'Version: 2021-07-28', 'Accept: application/json']]);
+    curl_exec($ch);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    $ghl = match (true) {
+        $code >= 200 && $code < 300 => 'ok',
+        $code === 401 => 'token rejected (expired, rotated or mistyped)',
+        $code === 403 => 'token lacks the View Email Campaigns permission or this sub-account',
+        $code === 0 => 'GoHighLevel unreachable from the server',
+        default => 'error ' . $code,
+    };
+    echo json_encode(['token' => 'set', 'ghl' => $ghl]);
+    exit;
+}
+
 // One issue as a page
 if (isset($_GET['id'])) {
     $id = preg_replace('/[^A-Za-z0-9]/', '', (string) $_GET['id']);
